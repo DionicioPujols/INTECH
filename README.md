@@ -1,3 +1,3 @@
 # INTECH
 
-Proyecto Final de AP1 - INTECH (Ingeniería y Tecnología Hernández).
+Proyecto Final de AP1 - INTECH (Ingeniería y Tecnología Hernández). 
