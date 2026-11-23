@@ -1,0 +1,89 @@
+<h1 class="h3 fw-bold">¡Bienvenido, @Nombre!</h1>
+<p class="text-body-secondary mb-4">Resumen de la operación de hoy.</p>
+
+<div class="row g-3 mb-4">
+    <div class="col-12 col-sm-6 col-xl-3">
+        <section class="card h-100 shadow-sm">
+            <div class="card-header bg-secondary-subtle bg-gradient fw-bold">Solicitudes pendientes</div>
+            <div class="card-body d-flex flex-column gap-2">
+                <span class="fs-2 fw-bold">0</span>
+                <a href="/Solicitud/Index">Ver solicitudes</a>
+            </div>
+        </section>
+    </div>
+    <div class="col-12 col-sm-6 col-xl-3">
+        <section class="card h-100 shadow-sm">
+            <div class="card-header bg-secondary-subtle bg-gradient fw-bold">Visitas programadas</div>
+            <div class="card-body d-flex flex-column gap-2">
+                <span class="fs-2 fw-bold">0</span>
+                <a href="/Agenda/Index">Ver agenda</a>
+            </div>
+        </section>
+    </div>
+    <div class="col-12 col-sm-6 col-xl-3">
+        <section class="card h-100 shadow-sm">
+            <div class="card-header bg-secondary-subtle bg-gradient fw-bold">Levantamientos pendientes</div>
+            <div class="card-body d-flex flex-column gap-2">
+                <span class="fs-2 fw-bold">0</span>
+                <a href="/Levantamiento/Index">Ver levantamientos</a>
+            </div>
+        </section>
+    </div>
+    <div class="col-12 col-sm-6 col-xl-3">
+        <section class="card h-100 shadow-sm">
+            <div class="card-header bg-secondary-subtle bg-gradient fw-bold">Órdenes de trabajo nuevas</div>
+            <div class="card-body d-flex flex-column gap-2">
+                <span class="fs-2 fw-bold">0</span>
+                <a href="/OrdenTrabajo/Index">Ver órdenes</a>
+            </div>
+        </section>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-12 col-xl-7">
+        <section class="card h-100 shadow-sm">
+            <h2 class="card-header h5 fw-bold bg-secondary-subtle bg-gradient mb-0">Próxima visita</h2>
+            <div class="card-body d-flex flex-column justify-content-center align-items-start gap-2 py-4">
+                <span class="bi bi-calendar-week fs-2 text-body-secondary" aria-hidden="true"></span>
+                <p class="text-body-secondary mb-0">No hay visitas programadas.</p>
+                <a href="/Agenda/Index" class="btn btn-outline-secondary">Ver agenda</a>
+            </div>
+        </section>
+    </div>
+    <div class="col-12 col-xl-5">
+        <section class="card h-100 shadow-sm">
+            <h2 class="card-header h5 fw-bold bg-secondary-subtle bg-gradient mb-0">Actividad reciente</h2>
+            <div class="card-body d-flex flex-column justify-content-between gap-3">
+                <p class="text-body-secondary my-3">No hay actividades registradas.</p>
+                <a href="/Historial/Index">Ver todas las actividades</a>
+            </div>
+        </section>
+    </div>
+</div>
+
+<section class="card shadow-sm">
+    <h2 class="card-header h5 fw-bold bg-secondary-subtle bg-gradient mb-0">Accesos rápidos</h2>
+    <div class="card-body d-flex flex-column flex-lg-row flex-wrap gap-3">
+        <a href="/Solicitud/Create" class="btn btn-primary fw-bold d-flex align-items-center justify-content-center gap-2 flex-grow-1">
+            <span class="bi bi-plus-lg" aria-hidden="true"></span> Nueva solicitud
+        </a>
+        <a href="/Agenda/Create" class="btn btn-primary fw-bold d-flex align-items-center justify-content-center gap-2 flex-grow-1">
+            <span class="bi bi-calendar-plus" aria-hidden="true"></span> Crear visita
+        </a>
+        <a href="/Levantamiento/Create" class="btn btn-primary fw-bold d-flex align-items-center justify-content-center gap-2 flex-grow-1">
+            <span class="bi bi-compass" aria-hidden="true"></span> Nuevo levantamiento
+        </a>
+        <a href="/OrdenTrabajo/Index" class="btn btn-primary fw-bold d-flex align-items-center justify-content-center gap-2 flex-grow-1">
+            <span class="bi bi-clipboard-check" aria-hidden="true"></span> Órdenes de trabajo
+        </a>
+        <a href="/Cliente/Index" class="btn btn-primary fw-bold d-flex align-items-center justify-content-center gap-2 flex-grow-1">
+            <span class="bi bi-people" aria-hidden="true"></span> Clientes
+        </a>
+    </div>
+</section>
+
+@code {
+    [Parameter]
+    public string? Nombre { get; set; }
+}
