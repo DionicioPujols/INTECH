@@ -2,6 +2,110 @@ html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
+.tecnico-layout {
+    --bs-primary-rgb: 70, 59, 196;
+    --bs-link-color: #463bc4;
+    --bs-link-hover-color: #362d9a;
+    --bs-link-color-rgb: 70, 59, 196;
+    --bs-link-hover-color-rgb: 54, 45, 154;
+}
+
+.tecnico-header {
+    background-color: #463bc4;
+    min-height: 80px;
+}
+
+.tecnico-header .tecnico-marca,
+.tecnico-header .tecnico-marca:hover {
+    color: #ff373b;
+}
+
+.tecnico-sidebar {
+    width: 100%;
+}
+
+.tecnico-sidebar .nav-link {
+    color: #343a40;
+}
+
+.tecnico-nav .nav-item,
+.tecnico-nav-user {
+    font-size: 0.9rem;
+}
+
+.tecnico-nav .nav-link {
+    height: 3rem;
+    line-height: 3rem;
+    gap: 0.75rem;
+    width: 100%;
+    border-radius: 4px;
+}
+
+.tecnico-nav .bi,
+.tecnico-nav-user .bi-person-fill {
+    display: inline-block;
+    position: relative;
+    top: -1px;
+    width: 1.25rem;
+    height: 1.25rem;
+    font-size: 1.25rem;
+    line-height: 1.25rem;
+    flex-shrink: 0;
+}
+
+.tecnico-sidebar .nav-link:hover,
+.tecnico-sidebar .nav-link.active {
+    color: #463bc4;
+    background-color: #eeecfa;
+}
+
+.tecnico-content {
+    min-width: 0;
+}
+
+.tecnico-layout a:not(.btn):not(.nav-link):not(.tecnico-marca) {
+    color: #463bc4;
+}
+
+.tecnico-layout .btn-primary {
+    --bs-btn-bg: #463bc4;
+    --bs-btn-border-color: #463bc4;
+    --bs-btn-hover-bg: #362d9a;
+    --bs-btn-hover-border-color: #362d9a;
+    --bs-btn-active-bg: #362d9a;
+    --bs-btn-active-border-color: #362d9a;
+    --bs-btn-disabled-bg: #463bc4;
+    --bs-btn-disabled-border-color: #463bc4;
+    --bs-btn-focus-shadow-rgb: 70, 59, 196;
+    background-color: var(--bs-btn-bg);
+    border-color: var(--bs-btn-border-color);
+}
+
+.tecnico-layout .btn-primary:hover,
+.tecnico-layout .btn-primary:focus-visible {
+    background-color: var(--bs-btn-hover-bg);
+    border-color: var(--bs-btn-hover-border-color);
+}
+
+.tecnico-layout .btn-outline-danger {
+    --bs-btn-color: #c5242a;
+    --bs-btn-border-color: #ff373b;
+    --bs-btn-hover-bg: #c5242a;
+    --bs-btn-hover-border-color: #c5242a;
+    --bs-btn-active-bg: #c5242a;
+    --bs-btn-active-border-color: #c5242a;
+}
+
+@media (min-width: 768px) {
+    .tecnico-sidebar {
+        width: 250px;
+        position: sticky;
+        top: 80px;
+        height: calc(100dvh - 80px);
+        overflow-y: auto;
+    }
+}
+
 a, .btn-link {
     color: #006bb7;
 }
