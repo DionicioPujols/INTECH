@@ -10,4 +10,29 @@ public class Contexto : DbContext
     }
 
     public DbSet<Modelo1> Modelos { get; set; }
+    public DbSet<EstadosSolicitudes> EstadosSolicitudes { get; set; }
+    public DbSet<Solicitudes> Solicitudes { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<EstadosSolicitudes>().HasData(
+            new EstadosSolicitudes
+            {
+                EstadoSolicitudId = 1,
+                Nombre = "Pendiente"
+            },
+            new EstadosSolicitudes
+            {
+                EstadoSolicitudId = 2,
+                Nombre = "Finalizada"
+            },
+            new EstadosSolicitudes
+            {
+                EstadoSolicitudId = 3,
+                Nombre = "Cancelada"
+            }
+        );
+    }
 }

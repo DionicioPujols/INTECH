@@ -41,6 +41,8 @@ builder.Services.AddDbContextFactory<Contexto>(options =>
     options.UseSqlServer(ConStr));
 
 builder.Services.AddScoped<ModelosService>();
+builder.Services.AddScoped<EstadosSolicitudesService>();
+builder.Services.AddScoped<SolicitudesService>();
 
 builder.Services.AddBlazorBootstrap();
 
