@@ -93,7 +93,7 @@ namespace Microsoft.AspNetCore.Routing
                 var user = string.IsNullOrEmpty(username) ? null : await userManager.FindByNameAsync(username);
                 var optionsJson = await signInManager.MakePasskeyRequestOptionsAsync(user);
                 return TypedResults.Content(optionsJson, contentType: "application/json");
-            });
+            }).AllowAnonymous();
 
             var manageGroup = accountGroup.MapGroup("/Manage").RequireAuthorization();
 
