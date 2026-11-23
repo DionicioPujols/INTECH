@@ -1,0 +1,37 @@
+@page "/Solicitud/Create"
+@attribute [Authorize(Roles = "Técnico")]
+
+<PageTitle>Nueva solicitud | INTECH</PageTitle>
+
+<div class="container-fluid p-0">
+    <div class="card">
+        <div class="card-header text-center">
+            <h1 class="h4 fw-normal mb-0">Nueva solicitud</h1>
+        </div>
+        <div class="card-body d-flex flex-column gap-4">
+            <p class="text-body-secondary mb-0">Vista de diseño. El registro de datos estará disponible cuando se implemente este módulo.</p>
+            <div class="d-flex flex-column gap-3">
+                <div>
+                    <label for="cliente" class="form-label fw-bold">Cliente</label>
+                    <select id="cliente" class="form-select" disabled>
+                        <option>Seleccione un cliente registrado</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="servicio" class="form-label fw-bold">Tipo de Servicio</label>
+                    <select id="servicio" class="form-select" disabled>
+                        <option>Seleccione el tipo de servicio</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="direccion" class="form-label fw-bold">Dirección del Servicio</label>
+                    <input id="direccion" class="form-control" placeholder="ej. Calle Principal #12, Santiago" disabled />
+                </div>
+            </div>
+        </div>
+        <div class="card-footer d-flex justify-content-center gap-2">
+            <a href="/Solicitud/Index" class="btn btn-secondary d-flex align-items-center gap-2"><span class="bi bi-arrow-left" aria-hidden="true"></span> Volver</a>
+            <button type="button" class="btn btn-primary d-flex align-items-center gap-2" disabled><span class="bi bi-floppy" aria-hidden="true"></span> Guardar</button>
+        </div>
+    </div>
+</div>
