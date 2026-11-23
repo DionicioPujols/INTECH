@@ -63,7 +63,7 @@ html, body {
     min-width: 0;
 }
 
-.tecnico-layout a:not(.btn):not(.nav-link):not(.tecnico-marca) {
+.tecnico-layout a:not(.btn):not(.nav-link):not(.tecnico-marca):not(.col-title) {
     color: #463bc4;
 }
 
