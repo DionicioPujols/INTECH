@@ -424,3 +424,21 @@ FodyWeavers.xsd
 
 # Official VS Code C# Dev Kit Extension exclusion
 #*.lscache
+
+# Archivos temporales de SQLite
+*.db-shm
+*.db-wal
+
+# Instrucciones locales para asistentes de IA (Claude, ChatGPT/Codex, Gemini, Antigravity)
+# No se suben al repositorio.
+/AGENTS.md
+/CLAUDE.md
+/CLAUDE.local.md
+/GEMINI.md
+/.ai/
+/.agent/
+/.agents/
+/.claude/
+/.gemini/
+/.codex/
+/.cursor/
