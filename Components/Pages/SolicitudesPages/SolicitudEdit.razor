@@ -18,6 +18,20 @@
             </div>
 
             <div class="card-body">
+                @* Cliente *@
+                <div class="mb-3">
+                    <label class="form-label" for="NombreCliente"><strong>Cliente</strong></label>
+                    <InputText id="NombreCliente" class="form-control" @bind-Value="Solicitud.NombreCliente" maxlength="150"></InputText>
+                    <ValidationMessage For="(() => Solicitud.NombreCliente)" />
+                </div>
+
+                @* Tipo de servicio *@
+                <div class="mb-3">
+                    <label class="form-label" for="TipoServicio"><strong>Tipo de servicio</strong></label>
+                    <InputText id="TipoServicio" class="form-control" @bind-Value="Solicitud.TipoServicio" maxlength="150"></InputText>
+                    <ValidationMessage For="(() => Solicitud.TipoServicio)" />
+                </div>
+
                 @* Contacto *@
                 <div class="mb-3">
                     <label class="form-label" for="Contacto"><strong>Contacto</strong></label>
@@ -128,6 +142,8 @@
 
     public async Task Modificar()
     {
+        Solicitud.NombreCliente = Solicitud.NombreCliente?.Trim() ?? string.Empty;
+        Solicitud.TipoServicio = Solicitud.TipoServicio?.Trim() ?? string.Empty;
         Solicitud.Contacto = Solicitud.Contacto?.Trim() ?? string.Empty;
         Solicitud.Direccion = Solicitud.Direccion?.Trim() ?? string.Empty;
         Solicitud.TecnicoAsignado = Solicitud.TecnicoAsignado?.Trim() ?? string.Empty;

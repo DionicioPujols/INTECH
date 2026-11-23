@@ -10,6 +10,14 @@ public class Solicitudes
 
     public bool IsDeleted { get; set; }
 
+    [Required(ErrorMessage = "Este Campo Es Requerido")]
+    [StringLength(150, ErrorMessage = "El cliente no puede superar los 150 caracteres")]
+    public string NombreCliente { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Este Campo Es Requerido")]
+    [StringLength(150, ErrorMessage = "El tipo de servicio no puede superar los 150 caracteres")]
+    public string TipoServicio { get; set; } = string.Empty;
+
     [StringLength(50, ErrorMessage = "El contacto no puede superar los 50 caracteres")]
     public string Contacto { get; set; } = string.Empty;
 

@@ -63,12 +63,8 @@
             <div class="grid">
                 <QuickGrid Items="ListaSolicitudes.AsQueryable()" Class="table table-hover mt-3">
                     <PropertyColumn Property="@(s => s.SolicitudId)" Title="ID" Sortable="true" />
-                    <TemplateColumn Title="Cliente">
-                        —
-                    </TemplateColumn>
-                    <TemplateColumn Title="Tipo de servicio">
-                        —
-                    </TemplateColumn>
+                    <PropertyColumn Property="@(s => s.NombreCliente)" Title="Cliente" Sortable="true" />
+                    <PropertyColumn Property="@(s => s.TipoServicio)" Title="Tipo de servicio" Sortable="true" />
                     <PropertyColumn Property="@(s => s.FechaSolicitud)" Title="Fecha de solicitud" Format="dd/MM/yyyy" Sortable="true" />
                     <PropertyColumn Property="@(s => s.EstadoSolicitud!.Nombre)" Title="Estado" Sortable="true" />
                     <TemplateColumn Title="Acciones" Align="Align.Center">
