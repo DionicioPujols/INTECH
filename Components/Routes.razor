@@ -3,7 +3,16 @@
     <Found Context="routeData">
         <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
             <NotAuthorized>
-                <RedirectToLogin />
+                <AuthorizeView Context="sesion">
+                    <Authorized>
+                        <h1 class="h4">Acceso denegado</h1>
+                        <p>Tu cuenta no tiene permiso para acceder a esta página.</p>
+                        <a href="/" class="btn btn-secondary">Volver al inicio</a>
+                    </Authorized>
+                    <NotAuthorized>
+                        <RedirectToLogin />
+                    </NotAuthorized>
+                </AuthorizeView>
             </NotAuthorized>
         </AuthorizeRouteView>
         <FocusOnNavigate RouteData="routeData" Selector="h1" />
