@@ -96,15 +96,15 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
                 b.HasData(
                     new
                     {
-                        Id = "00000000-0000-0000-0000-000000000010",
+                        Id = "4d5d30d0-65b0-494d-a356-69a6a25e1063",
                         AccessFailedCount = 0,
-                        ConcurrencyStamp = "00000000-0000-0000-0000-000000000012",
+                        ConcurrencyStamp = "1226f878-2209-425f-b4cb-f512fbc97c72",
                         EmailConfirmed = false,
                         LockoutEnabled = true,
                         NormalizedUserName = "ADMIN",
                         PasswordHash = "AQAAAAIAAYagAAAAEBpUpJtjUT1J1rgHrNB5JRV0pCR+d9CxHDy5PJwCrBvWmMECBG1HjjC2P1Jk5Rk9Qw==",
                         PhoneNumberConfirmed = false,
-                        SecurityStamp = "00000000-0000-0000-0000-000000000011",
+                        SecurityStamp = "aa26598b-8bdf-4c7b-b308-e0dbd9bf2d3f",
                         TwoFactorEnabled = false,
                         UserName = "admin"
                     });
@@ -139,22 +139,22 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
                 b.HasData(
                     new
                     {
-                        Id = "00000000-0000-0000-0000-000000000001",
-                        ConcurrencyStamp = "00000000-0000-0000-0000-000000000001",
+                        Id = "59e653a4-d69a-4abb-8a91-341506ee8a06",
+                        ConcurrencyStamp = "40753da4-be56-42bd-b90d-d20d06ccfaf1",
                         Name = "Administrador",
                         NormalizedName = "ADMINISTRADOR"
                     },
                     new
                     {
-                        Id = "00000000-0000-0000-0000-000000000002",
-                        ConcurrencyStamp = "00000000-0000-0000-0000-000000000002",
+                        Id = "a86a7a8a-6dd3-40c8-a596-1a8e9788cc9a",
+                        ConcurrencyStamp = "9edc1fd0-cb93-4eb6-82a2-171b12d3c49e",
                         Name = "Técnico",
                         NormalizedName = "TÉCNICO"
                     },
                     new
                     {
-                        Id = "00000000-0000-0000-0000-000000000003",
-                        ConcurrencyStamp = "00000000-0000-0000-0000-000000000003",
+                        Id = "6dae16d7-4344-451e-8052-9582ed4595d1",
+                        ConcurrencyStamp = "f24b9410-da9a-4994-88f7-7e2767e3ce14",
                         Name = "Gerente",
                         NormalizedName = "GERENTE"
                     });
@@ -302,8 +302,8 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
                 b.HasData(
                     new
                     {
-                        UserId = "00000000-0000-0000-0000-000000000010",
-                        RoleId = "00000000-0000-0000-0000-000000000001"
+                        UserId = "4d5d30d0-65b0-494d-a356-69a6a25e1063",
+                        RoleId = "59e653a4-d69a-4abb-8a91-341506ee8a06"
                     });
             });
 
