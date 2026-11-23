@@ -2,24 +2,44 @@
 @using INTECH.Components.Account.Shared
 
 <AuthorizeView>
-    <Authorized>
+    <Authorized Context="sesion">
         <Toasts class="p-3" Placement="ToastsPlacement.TopRight" />
 
-        <div class="page">
-            <div class="sidebar">
-                <NavMenu />
+        @if (sesion.User.IsInRole("Técnico"))
+        {
+            <div class="tecnico-layout d-flex flex-column min-vh-100">
+                <header class="tecnico-header sticky-top d-flex flex-wrap align-items-center gap-3 px-4 py-3">
+                    <a class="tecnico-marca fs-2 fw-bold text-decoration-none" href="/">INTECH</a>
+                    <span class="text-white border-start ps-3">Ingeniería y Tecnología Hdez.</span>
+                </header>
+                <div class="d-flex flex-column flex-md-row flex-grow-1">
+                    <aside class="tecnico-sidebar bg-white border-end d-flex flex-column flex-shrink-0">
+                        <TecnicoNavMenu />
+                    </aside>
+                    <main class="tecnico-content flex-grow-1 p-3 p-lg-4">
+                        @Body
+                    </main>
+                </div>
             </div>
-
-            <main>
-                <div class="top-row px-4">
-                    <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+        }
+        else
+        {
+            <div class="page">
+                <div class="sidebar">
+                    <NavMenu />
                 </div>
 
-                <article class="content px-4">
-                    @Body
-                </article>
-            </main>
-        </div>
+                <main>
+                    <div class="top-row px-4">
+                        <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+                    </div>
+
+                    <article class="content px-4">
+                        @Body
+                    </article>
+                </main>
+            </div>
+        }
 
         <div id="blazor-error-ui" data-nosnippet>
             An unhandled error has occurred.
