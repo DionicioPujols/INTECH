@@ -16,7 +16,7 @@ partial class ContextoModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261124070953_EliminarModeloDeEjemplo";
+    public override string LastMigrationId => "20261124071440_NormalizarSolicitudes";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -106,13 +106,8 @@ partial class ContextoModelSnapshot : ModelSnapshot
 
                 SqlServerPropertyBuilderExtensions.UseIdentityColumn(solicitudId);
 
-                b.Property<int?>("ClienteId")
+                b.Property<int>("ClienteId")
                     .HasColumnType("int");
-
-                b.Property<string>("Contacto")
-                    .IsRequired()
-                    .HasMaxLength(50)
-                    .HasColumnType("nvarchar(50)");
 
                 b.Property<string>("Direccion")
                     .IsRequired()
@@ -122,24 +117,11 @@ partial class ContextoModelSnapshot : ModelSnapshot
                 b.Property<int>("EstadoSolicitudId")
                     .HasColumnType("int");
 
-                b.Property<DateTime?>("FechaFin")
-                    .HasColumnType("datetime2");
-
                 b.Property<DateTime>("FechaSolicitud")
                     .HasColumnType("datetime2");
 
                 b.Property<bool>("IsDeleted")
                     .HasColumnType("bit");
-
-                b.Property<string>("NombreCliente")
-                    .IsRequired()
-                    .HasMaxLength(150)
-                    .HasColumnType("nvarchar(150)");
-
-                b.Property<string>("TecnicoAsignado")
-                    .IsRequired()
-                    .HasMaxLength(150)
-                    .HasColumnType("nvarchar(150)");
 
                 b.Property<string>("TipoServicio")
                     .IsRequired()
@@ -188,7 +170,9 @@ partial class ContextoModelSnapshot : ModelSnapshot
             {
                 b.HasOne("INTECH.Models.Clientes", "Cliente")
                     .WithMany("Solicitudes")
-                    .HasForeignKey("ClienteId");
+                    .HasForeignKey("ClienteId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
                 b.HasOne("INTECH.Models.EstadosSolicitudes", "EstadoSolicitud")
                     .WithMany("Solicitudes")
