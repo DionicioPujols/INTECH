@@ -16,7 +16,7 @@ partial class ContextoModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261124063255_QuitarIndicesClientes";
+    public override string LastMigrationId => "20261124070953_EliminarModeloDeEjemplo";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -96,19 +96,6 @@ partial class ContextoModelSnapshot : ModelSnapshot
                         EstadoSolicitudId = 3,
                         Nombre = "Cancelada"
                     });
-            });
-
-        modelBuilder.Entity("INTECH.Models.Modelo1", b =>
-            {
-                var modeloId = b.Property<int>("ModeloId")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
-
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(modeloId);
-
-                b.HasKey("ModeloId");
-
-                b.ToTable("Modelos");
             });
 
         modelBuilder.Entity("INTECH.Models.Solicitudes", b =>
