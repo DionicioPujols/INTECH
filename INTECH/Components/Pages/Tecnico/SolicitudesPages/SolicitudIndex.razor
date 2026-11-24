@@ -2,7 +2,6 @@
 @attribute [Authorize(Roles = "Técnico")]
 
 @inject SolicitudesService solicitudesService
-@inject EstadosSolicitudesService estadosSolicitudesService
 @inject ToastService toastService
 
 <PageTitle>Registro de Solicitudes</PageTitle>
@@ -13,73 +12,134 @@
             <a href="/Solicitud/Create" class="btn btn-primary"> <span class="bi bi-plus-square mt-3"></span> Crear</a>
         </div>
 
-        @* Filtro *@
         <div class="card-body">
+            @* Filtro *@
             <div class="row">
                 <div class="col-3">
                     <label class="col-form-label"><strong>Filtrar por</strong></label>
                 </div>
                 <div class="col-4">
-                    <label class="col-form-label"><strong>B&uacute;squeda</strong></label>
+                    <label class="col-form-label"><strong>Búsqueda</strong></label>
                 </div>
             </div>
 
-            @* Controles de Busqueda *@
+            @* Controles de búsqueda *@
             <div class="row align-items-center">
                 <div class="col-3">
                     <InputSelect class="form-select" @bind-Value="Filtro">
                         <option value="" selected disabled>Elija una opci&oacute;n</option>
-                        <option value="SolicitudId">ID</option>
-                        <option value="FechaSolicitud">Fecha de solicitud</option>
-                        <option value="EstadoSolicitudId">Estado</option>
+                        <option value="SolicitudId">SolicitudId</option>
+                        <option value="Cliente">Cliente</option>
+                        <option value="TipoServicio">Tipo de Servicio</option>
+                        <option value="Estado">Estado</option>
+                        <option value="Fecha">Fecha</option>
                     </InputSelect>
                 </div>
                 <div class="col-4">
                     <div class="input-group">
-                        @if (Filtro == "FechaSolicitud")
-                        {
-                            <InputDate class="form-control" @bind-Value="FechaFiltro" aria-label="Fecha de solicitud" />
-                        }
-                        else if (Filtro == "EstadoSolicitudId")
-                        {
-                            <InputSelect class="form-control form-select" @bind-Value="EstadoFiltroId" aria-label="Estado">
-                                <option value="0">Todos los estados</option>
-                                @foreach (var estadoSolicitud in ListaEstadosSolicitudes)
-                                {
-                                    <option value="@estadoSolicitud.EstadoSolicitudId">@estadoSolicitud.Nombre</option>
-                                }
-                            </InputSelect>
-                        }
-                        else
-                        {
-                            <input class="form-control" @bind="ValorFiltro" placeholder="ID de solicitud" aria-label="ID de solicitud" />
-                        }
-                        <button disabled="@(!RendererInfo.IsInteractive)" type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar" aria-label="Buscar solicitudes"></button>
+                        <input class="form-control" @bind="ValorFiltro" placeholder="Buscar" />
+                        <button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"></button>
                     </div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-3">
+                    <label class="col-form-label"><strong>Desde</strong></label>
+                    <InputDate class="form-control" @bind-Value="Desde"></InputDate>
+                </div>
+                <div class="col-3">
+                    <label class="col-form-label"><strong>Hasta</strong></label>
+                    <InputDate class="form-control" @bind-Value="Hasta"></InputDate>
                 </div>
             </div>
 
             @* Tabla *@
             <div class="grid">
                 <QuickGrid Items="ListaSolicitudes.AsQueryable()" Class="table table-hover mt-3">
-                    <PropertyColumn Property="@(s => s.SolicitudId)" Title="ID" Sortable="true" />
-                    <PropertyColumn Property="@(s => s.NombreCliente)" Title="Cliente" Sortable="true" />
-                    <PropertyColumn Property="@(s => s.TipoServicio)" Title="Tipo de servicio" Sortable="true" />
-                    <PropertyColumn Property="@(s => s.FechaSolicitud)" Title="Fecha de solicitud" Format="dd/MM/yyyy" Sortable="true" />
-                    <PropertyColumn Property="@(s => s.EstadoSolicitud!.Nombre)" Title="Estado" Sortable="true" />
-                    <TemplateColumn Title="Acciones" Align="Align.Center">
+                    <PropertyColumn Property="@(s => s.SolicitudId)" Title="SolicitudId" Sortable="true" />
+                    <PropertyColumn Property="@(s => s.Cliente.Nombre)" Title="Cliente" Sortable="true" />
+                    <PropertyColumn Property="@(s => s.TipoServicio)" Title="Tipo de Servicio" Sortable="true" />
+                    <PropertyColumn Property="@(s => s.FechaSolicitud)" Title="Fecha de Solicitud" Format="dd/MM/yyyy" Sortable="true" />
+                    <TemplateColumn Title="Estado">
+                        <span class="badge @ObtenerColorEstado(context.EstadoSolicitudId)">@context.EstadoSolicitud.Nombre</span>
+                    </TemplateColumn>
+                    <TemplateColumn Title="Opciones" Align="Align.Center">
                         <div class="d-flex text-nowrap">
-                            <a href="/Solicitud/Edit/@context.SolicitudId" class="btn btn-outline-primary bi bi-pencil-square" aria-label="Editar solicitud"></a>
-                            <button disabled="@(!RendererInfo.IsInteractive)" type="button" class="btn btn-outline-danger bi bi-trash ms-2" data-bs-toggle="modal" data-bs-target="#modalEliminarSolicitud" @onclick="() => solicitudIdAEliminar = context.SolicitudId" aria-label="Eliminar solicitud"></button>
+                            <button type="button" class="btn btn-outline-primary bi bi-eye"
+                                    data-bs-toggle="modal" data-bs-target="#modalDetalleSolicitud"
+                                    @onclick="() => SolicitudSeleccionada = context"></button>
+                            <a href="/Solicitud/Edit/@context.SolicitudId" class="btn btn-outline-primary bi bi-pencil-square ms-2"></a>
+                            <button type="button" class="btn btn-outline-danger bi bi-trash ms-2"
+                                    data-bs-toggle="modal" data-bs-target="#modalEliminarSolicitud"
+                                    @onclick="() => solicitudIdAEliminar = context.SolicitudId"></button>
                         </div>
                     </TemplateColumn>
                 </QuickGrid>
             </div>
         </div>
+
         <div class="card-footer d-flex justify-content-between align-center mb-4">
-            <label>Cantidad:  @ListaSolicitudes.Count()</label>
+            <label>Cantidad:  @ListaSolicitudes.Count</label>
         </div>
     </div>
+</div>
+
+@* Modal de detalle *@
+<div class="modal fade" id="modalDetalleSolicitud" tabindex="-1" aria-labelledby="modalDetalleSolicitudLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h1 class="modal-title fs-5" id="modalDetalleSolicitudLabel">Detalle de la Solicitud</h1>
+          <small class="text-body-secondary">Solicitud @SolicitudSeleccionada.SolicitudId</small>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-12 col-md-6">
+            <div class="border rounded bg-light p-3 h-100">
+              <small class="text-uppercase text-body-secondary fw-bold">Cliente</small>
+              <p class="mb-0 fw-semibold">@SolicitudSeleccionada.Cliente?.Nombre</p>
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="border rounded bg-light p-3 h-100">
+              <small class="text-uppercase text-body-secondary fw-bold">Contacto</small>
+              <p class="mb-0 fw-semibold">@SolicitudSeleccionada.Cliente?.TelefonosClientes.FirstOrDefault(t => t.EsPrincipal)?.Numero</p>
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="border rounded bg-light p-3 h-100">
+              <small class="text-uppercase text-body-secondary fw-bold">Tipo de Servicio</small>
+              <p class="mb-0 fw-semibold">@SolicitudSeleccionada.TipoServicio</p>
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="border rounded bg-light p-3 h-100">
+              <small class="text-uppercase text-body-secondary fw-bold">Dirección</small>
+              <p class="mb-0 fw-semibold">@SolicitudSeleccionada.Direccion</p>
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="border rounded bg-light p-3 h-100">
+              <small class="text-uppercase text-body-secondary fw-bold">Fecha de Solicitud</small>
+              <p class="mb-0 fw-semibold">@SolicitudSeleccionada.FechaSolicitud.ToString("dd/MM/yyyy")</p>
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="border rounded bg-light p-3 h-100">
+              <small class="text-uppercase text-body-secondary fw-bold">Estado</small>
+              <p class="mb-0 fw-semibold">@SolicitudSeleccionada.EstadoSolicitud?.Nombre</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 @* Modal de eliminación *@
@@ -88,14 +148,14 @@
     <div class="modal-content">
       <div class="modal-header">
         <h1 class="modal-title fs-5" id="modalEliminarSolicitudLabel">Eliminar Solicitud</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         ¿Estás seguro de que deseas eliminar esta solicitud?
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button disabled="@(!RendererInfo.IsInteractive)" type="button" class="btn btn-danger" data-bs-dismiss="modal" @onclick="Eliminar">Sí, eliminar</button>
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal" @onclick="Eliminar">Sí, eliminar</button>
       </div>
     </div>
   </div>
@@ -103,68 +163,117 @@
 
 @code {
     public List<Solicitudes> ListaSolicitudes { get; set; } = new List<Solicitudes>();
-    public List<EstadosSolicitudes> ListaEstadosSolicitudes { get; set; } = new List<EstadosSolicitudes>();
+    public Solicitudes SolicitudSeleccionada { get; set; } = new Solicitudes();
     public string Filtro { get; set; } = string.Empty;
     public string ValorFiltro { get; set; } = string.Empty;
-    public DateTime? FechaFiltro { get; set; }
-    public int EstadoFiltroId { get; set; }
+    public DateTime? Desde { get; set; }
+    public DateTime? Hasta { get; set; }
+    private int solicitudIdAEliminar;
 
     protected override async Task OnInitializedAsync()
     {
-        var estadosSolicitudesResult = await estadosSolicitudesService.GetList(e => true);
-        estadosSolicitudesResult.OnSuccess(estadosSolicitudes => ListaEstadosSolicitudes = estadosSolicitudes);
-        estadosSolicitudesResult.OnFailure(() => toastService.ShowError("No se pudieron cargar los estados."));
+        await CargarSolicitudes();
+        Desde = null;
+        Hasta = null;
+    }
 
+    private async Task CargarSolicitudes()
+    {
         var solicitudesResult = await solicitudesService.GetList(s => true);
         solicitudesResult.OnSuccess(solicitudes => ListaSolicitudes = solicitudes);
-        solicitudesResult.OnFailure(() => toastService.ShowError("No se pudieron cargar las solicitudes."));
+        solicitudesResult.OnFailure(() => toastService.ShowError("No se pudieron consultar las solicitudes."));
     }
 
-    private async Task Buscar()
+    private string ObtenerColorEstado(int estadoSolicitudId)
     {
-        if (Filtro == "SolicitudId" && ValorFiltro.Trim() != "")
+        if (estadoSolicitudId == 2)
         {
-            if (!int.TryParse(ValorFiltro.Trim(), out var solicitudId) || solicitudId <= 0)
-            {
-                toastService.ShowError("Ingrese un ID de solicitud válido.");
-                return;
-            }
+            return "text-bg-success";
+        }
+        else if (estadoSolicitudId == 3)
+        {
+            return "text-bg-danger";
+        }
 
-            var solicitudesResult = await solicitudesService.GetList(s => s.SolicitudId == solicitudId);
-            solicitudesResult.OnSuccess(solicitudes => ListaSolicitudes = solicitudes);
-            solicitudesResult.OnFailure(() => toastService.ShowError("No se pudieron buscar las solicitudes."));
-        }
-        else if (Filtro == "FechaSolicitud" && FechaFiltro.HasValue)
-        {
-            var fecha = FechaFiltro.Value.Date;
-            var solicitudesResult = await solicitudesService.GetList(s => s.FechaSolicitud.Date == fecha);
-            solicitudesResult.OnSuccess(solicitudes => ListaSolicitudes = solicitudes);
-            solicitudesResult.OnFailure(() => toastService.ShowError("No se pudieron buscar las solicitudes."));
-        }
-        else if (Filtro == "EstadoSolicitudId" && EstadoFiltroId > 0)
-        {
-            var solicitudesResult = await solicitudesService.GetList(s => s.EstadoSolicitudId == EstadoFiltroId);
-            solicitudesResult.OnSuccess(solicitudes => ListaSolicitudes = solicitudes);
-            solicitudesResult.OnFailure(() => toastService.ShowError("No se pudieron buscar las solicitudes."));
-        }
-        else
-        {
-            var solicitudesResult = await solicitudesService.GetList(s => true);
-            solicitudesResult.OnSuccess(solicitudes => ListaSolicitudes = solicitudes);
-            solicitudesResult.OnFailure(() => toastService.ShowError("No se pudieron cargar las solicitudes."));
-        }
+        return "text-bg-warning";
     }
-
-    private int solicitudIdAEliminar;
 
     private async Task Eliminar()
     {
         var result = await solicitudesService.Eliminar(solicitudIdAEliminar);
         result.OnSuccess(() => toastService.ShowSuccess("Solicitud eliminada correctamente."));
-        result.OnFailure(() => toastService.ShowError("No se pudo eliminar correctamente"));
+        result.OnFailure(() => toastService.ShowError("No se pudo eliminar la solicitud."));
+
         if (result.IsSuccess)
         {
-            await Buscar();
+            await CargarSolicitudes();
+        }
+    }
+
+    private async Task Buscar()
+    {
+        var valor = ValorFiltro.Trim().ToLower();
+        if (Filtro == "Fecha")
+        {
+            if (Desde == null || Hasta == null)
+            {
+                toastService.ShowError("Seleccione las fechas desde y hasta.");
+                return;
+            }
+
+            if (Desde > Hasta)
+            {
+                toastService.ShowWarning("La fecha desde no puede ser mayor que la fecha hasta.");
+                return;
+            }
+
+            var solicitudesPorFechaResult = await solicitudesService.GetList(s =>
+                s.FechaSolicitud >= Desde && s.FechaSolicitud <= Hasta);
+            solicitudesPorFechaResult.OnSuccess(solicitudes => ListaSolicitudes = solicitudes);
+            solicitudesPorFechaResult.OnFailure(() =>
+                toastService.ShowError("No se pudieron consultar las solicitudes."));
+        }
+        else if (valor == "")
+        {
+            await CargarSolicitudes();
+        }
+        else if (Filtro == "SolicitudId")
+        {
+            if (!int.TryParse(valor, out var solicitudId))
+            {
+                toastService.ShowError("Ingrese un número de solicitud válido.");
+                return;
+            }
+
+            var solicitudesPorIdResult = await solicitudesService.GetList(s => s.SolicitudId == solicitudId);
+            solicitudesPorIdResult.OnSuccess(solicitudes => ListaSolicitudes = solicitudes);
+            solicitudesPorIdResult.OnFailure(() =>
+                toastService.ShowError("No se pudieron consultar las solicitudes."));
+        }
+        else if (Filtro == "Cliente")
+        {
+            var solicitudesPorClienteResult = await solicitudesService.GetList(s => s.Cliente.Nombre.ToLower().Contains(valor));
+            solicitudesPorClienteResult.OnSuccess(solicitudes => ListaSolicitudes = solicitudes);
+            solicitudesPorClienteResult.OnFailure(() =>
+                toastService.ShowError("No se pudieron consultar las solicitudes."));
+        }
+        else if (Filtro == "TipoServicio")
+        {
+            var solicitudesPorTipoResult = await solicitudesService.GetList(s => s.TipoServicio.ToLower().Contains(valor));
+            solicitudesPorTipoResult.OnSuccess(solicitudes => ListaSolicitudes = solicitudes);
+            solicitudesPorTipoResult.OnFailure(() =>
+                toastService.ShowError("No se pudieron consultar las solicitudes."));
+        }
+        else if (Filtro == "Estado")
+        {
+            var solicitudesPorEstadoResult = await solicitudesService.GetList(s => s.EstadoSolicitud.Nombre.ToLower().Contains(valor));
+            solicitudesPorEstadoResult.OnSuccess(solicitudes => ListaSolicitudes = solicitudes);
+            solicitudesPorEstadoResult.OnFailure(() =>
+                toastService.ShowError("No se pudieron consultar las solicitudes."));
+        }
+        else
+        {
+            toastService.ShowError("Seleccione un filtro.");
         }
     }
 }
