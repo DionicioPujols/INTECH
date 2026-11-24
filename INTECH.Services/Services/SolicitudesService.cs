@@ -52,6 +52,20 @@ public class SolicitudesService(
             return false;
         }
 
+        if (solicitud.ClienteId.HasValue)
+        {
+            var cliente = await contexto.Clientes
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.ClienteId == solicitud.ClienteId && !c.IsDeleted);
+            if (cliente == null)
+            {
+                return false;
+            }
+
+            solicitud.NombreCliente = cliente.Nombre;
+        }
+
+        solicitud.Cliente = null;
         solicitud.EstadoSolicitud = null!;
         contexto.Solicitudes.Add(solicitud);
         return await contexto.SaveChangesAsync() > 0;
@@ -69,6 +83,24 @@ public class SolicitudesService(
             return false;
         }
 
+        if (solicitud.ClienteId.HasValue)
+        {
+            var cliente = await contexto.Clientes
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.ClienteId == solicitud.ClienteId);
+            var clienteAnteriorId = await contexto.Solicitudes
+                .Where(s => s.SolicitudId == solicitud.SolicitudId)
+                .Select(s => s.ClienteId)
+                .FirstOrDefaultAsync();
+            if (cliente == null || (cliente.IsDeleted && clienteAnteriorId != cliente.ClienteId))
+            {
+                return false;
+            }
+
+            solicitud.NombreCliente = cliente.Nombre;
+        }
+
+        solicitud.Cliente = null;
         solicitud.EstadoSolicitud = null!;
         contexto.Update(solicitud);
         return await contexto.SaveChangesAsync() > 0;
