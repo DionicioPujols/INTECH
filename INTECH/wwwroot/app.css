@@ -87,6 +87,91 @@ html, body {
     border-color: var(--bs-btn-hover-border-color);
 }
 
+.tecnico-layout .btn-outline-primary {
+    --bs-btn-color: #463bc4;
+    --bs-btn-border-color: #463bc4;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: #463bc4;
+    --bs-btn-hover-border-color: #463bc4;
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: #362d9a;
+    --bs-btn-active-border-color: #362d9a;
+    --bs-btn-focus-shadow-rgb: 70, 59, 196;
+}
+
+.tecnico-layout .btn:focus,
+.tecnico-layout .btn:active:focus,
+.tecnico-layout .form-control:focus,
+.tecnico-layout .form-select:focus,
+.tecnico-layout .form-check-input:focus {
+    border-color: #a39de1;
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem rgba(70, 59, 196, 0.5);
+}
+
+.tecnico-layout .form-select {
+    accent-color: #463bc4;
+}
+
+.tecnico-layout .form-select option:checked {
+    background-color: #eeecfa;
+    color: #463bc4;
+}
+
+.tecnico-layout .form-select,
+.tecnico-layout .form-select::picker(select) {
+    appearance: base-select;
+}
+
+.tecnico-layout .form-select {
+    white-space: nowrap;
+}
+
+.tecnico-layout .form-select::picker-icon,
+.tecnico-layout .form-select option::checkmark {
+    display: none;
+}
+
+.tecnico-layout .form-select::picker(select) {
+    padding: 0.25rem 0;
+    border: 1px solid rgba(70, 59, 196, 0.3);
+    border-radius: 0.375rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+}
+
+.tecnico-layout .form-select option {
+    padding: 0.375rem 0.75rem;
+}
+
+.tecnico-layout .form-select option:hover,
+.tecnico-layout .form-select option:focus-visible {
+    background-color: #463bc4;
+    color: #fff;
+}
+
+.tecnico-layout .card {
+    --bs-card-cap-bg: #eeecfa;
+    --bs-card-border-color: rgba(70, 59, 196, 0.2);
+}
+
+.tecnico-layout .card-header {
+    display: flex;
+    align-items: center;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
+.tecnico-layout .card-header.text-center {
+    justify-content: center;
+}
+
+.tecnico-layout .card-header .card-title {
+    margin-bottom: 0;
+}
+
+.tecnico-layout .table > thead {
+    --bs-table-bg: #eeecfa;
+}
+
 .tecnico-layout .btn-outline-danger {
     --bs-btn-color: #c5242a;
     --bs-btn-border-color: #ff373b;
@@ -161,4 +246,9 @@ h1:focus {
 
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
+}
+
+.form-control::placeholder {
+    color: var(--bs-secondary-color);
+    opacity: 0.6;
 }
