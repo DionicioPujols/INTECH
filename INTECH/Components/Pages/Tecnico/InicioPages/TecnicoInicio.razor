@@ -3,38 +3,38 @@
 
 <div class="row g-3 mb-4">
     <div class="col-12 col-sm-6 col-xl-3">
-        <section class="card h-100 shadow-sm">
-            <div class="card-header bg-secondary-subtle bg-gradient fw-bold">Solicitudes pendientes</div>
-            <div class="card-body d-flex flex-column gap-2">
-                <span class="fs-2 fw-bold">0</span>
-                <a href="/Solicitud/Index">Ver solicitudes</a>
+        <section class="card border-0 rounded-3 h-100 shadow-sm">
+            <div class="card-body d-flex flex-column gap-2 p-3">
+                <h2 class="small fw-normal text-body-secondary mb-0">Solicitudes pendientes</h2>
+                <span class="fs-2 fw-bold text-primary">0</span>
+                <a href="/Solicitud/Index" class="small">Ver solicitudes <span class="bi bi-arrow-right" aria-hidden="true"></span></a>
             </div>
         </section>
     </div>
     <div class="col-12 col-sm-6 col-xl-3">
-        <section class="card h-100 shadow-sm">
-            <div class="card-header bg-secondary-subtle bg-gradient fw-bold">Visitas programadas</div>
-            <div class="card-body d-flex flex-column gap-2">
-                <span class="fs-2 fw-bold">0</span>
-                <a href="/Agenda/Index">Ver agenda</a>
+        <section class="card border-0 rounded-3 h-100 shadow-sm">
+            <div class="card-body d-flex flex-column gap-2 p-3">
+                <h2 class="small fw-normal text-body-secondary mb-0">Visitas programadas</h2>
+                <span class="fs-2 fw-bold text-primary">0</span>
+                <a href="/Agenda/Index" class="small">Ver agenda <span class="bi bi-arrow-right" aria-hidden="true"></span></a>
             </div>
         </section>
     </div>
     <div class="col-12 col-sm-6 col-xl-3">
-        <section class="card h-100 shadow-sm">
-            <div class="card-header bg-secondary-subtle bg-gradient fw-bold">Levantamientos pendientes</div>
-            <div class="card-body d-flex flex-column gap-2">
-                <span class="fs-2 fw-bold">0</span>
-                <a href="/Levantamiento/Index">Ver levantamientos</a>
+        <section class="card border-0 rounded-3 h-100 shadow-sm">
+            <div class="card-body d-flex flex-column gap-2 p-3">
+                <h2 class="small fw-normal text-body-secondary mb-0">Levantamientos pendientes</h2>
+                <span class="fs-2 fw-bold text-primary">0</span>
+                <a href="/Levantamiento/Index" class="small">Ver levantamientos <span class="bi bi-arrow-right" aria-hidden="true"></span></a>
             </div>
         </section>
     </div>
     <div class="col-12 col-sm-6 col-xl-3">
-        <section class="card h-100 shadow-sm">
-            <div class="card-header bg-secondary-subtle bg-gradient fw-bold">Órdenes de trabajo nuevas</div>
-            <div class="card-body d-flex flex-column gap-2">
-                <span class="fs-2 fw-bold">0</span>
-                <a href="/OrdenTrabajo/Index">Ver órdenes</a>
+        <section class="card border-0 rounded-3 h-100 shadow-sm">
+            <div class="card-body d-flex flex-column gap-2 p-3">
+                <h2 class="small fw-normal text-body-secondary mb-0">Órdenes de trabajo nuevas</h2>
+                <span class="fs-2 fw-bold text-primary">0</span>
+                <a href="/OrdenTrabajo/Index" class="small">Ver órdenes <span class="bi bi-arrow-right" aria-hidden="true"></span></a>
             </div>
         </section>
     </div>
@@ -42,44 +42,58 @@
 
 <div class="row g-3 mb-4">
     <div class="col-12 col-xl-7">
-        <section class="card h-100 shadow-sm">
-            <h2 class="card-header h5 fw-bold bg-secondary-subtle bg-gradient mb-0">Próxima visita</h2>
-            <div class="card-body d-flex flex-column justify-content-center align-items-start gap-2 py-4">
-                <span class="bi bi-calendar-week fs-2 text-body-secondary" aria-hidden="true"></span>
-                <p class="text-body-secondary mb-0">No hay visitas programadas.</p>
-                <a href="/Agenda/Index" class="btn btn-outline-secondary">Ver agenda</a>
+        <section class="card border-0 rounded-3 h-100 shadow-sm">
+            <div class="card-body d-flex flex-column gap-3 p-3 p-lg-4">
+                <h2 class="h5 fw-bold mb-0">Próxima visita</h2>
+                <div class="d-flex flex-column justify-content-center align-items-start gap-2 py-4">
+                    <span class="bi bi-calendar-week fs-2 text-primary" aria-hidden="true"></span>
+                    <p class="text-body-secondary mb-0">No hay visitas programadas.</p>
+                    <a href="/Agenda/Index" class="btn btn-outline-dark">Ver agenda</a>
+                </div>
             </div>
         </section>
     </div>
     <div class="col-12 col-xl-5">
-        <section class="card h-100 shadow-sm">
-            <h2 class="card-header h5 fw-bold bg-secondary-subtle bg-gradient mb-0">Actividad reciente</h2>
-            <div class="card-body d-flex flex-column justify-content-between gap-3">
-                <p class="text-body-secondary my-3">No hay actividades registradas.</p>
-                <a href="/Historial/Index">Ver todas las actividades</a>
+        <section class="card border-0 rounded-3 h-100 shadow-sm">
+            <div class="card-body d-flex flex-column gap-3 p-3 p-lg-4">
+                <h2 class="h5 fw-bold mb-0">Actividad reciente</h2>
+                <div class="d-flex flex-column justify-content-between gap-3 flex-grow-1">
+                    <p class="text-body-secondary my-3">No hay actividades registradas.</p>
+                    <a href="/Historial/Index" class="small">Ver todas las actividades <span class="bi bi-arrow-right" aria-hidden="true"></span></a>
+                </div>
             </div>
         </section>
     </div>
 </div>
 
-<section class="card shadow-sm">
-    <h2 class="card-header h5 fw-bold bg-secondary-subtle bg-gradient mb-0">Accesos rápidos</h2>
-    <div class="card-body d-flex flex-column flex-lg-row flex-wrap gap-3">
-        <a href="/Solicitud/Create" class="btn btn-primary fw-bold d-flex align-items-center justify-content-center gap-2 flex-grow-1">
-            <span class="bi bi-plus-lg" aria-hidden="true"></span> Nueva solicitud
-        </a>
-        <a href="/Agenda/Create" class="btn btn-primary fw-bold d-flex align-items-center justify-content-center gap-2 flex-grow-1">
-            <span class="bi bi-calendar-plus" aria-hidden="true"></span> Crear visita
-        </a>
-        <a href="/Levantamiento/Create" class="btn btn-primary fw-bold d-flex align-items-center justify-content-center gap-2 flex-grow-1">
-            <span class="bi bi-compass" aria-hidden="true"></span> Nuevo levantamiento
-        </a>
-        <a href="/OrdenTrabajo/Index" class="btn btn-primary fw-bold d-flex align-items-center justify-content-center gap-2 flex-grow-1">
-            <span class="bi bi-clipboard-check" aria-hidden="true"></span> Órdenes de trabajo
-        </a>
-        <a href="/Cliente/Index" class="btn btn-primary fw-bold d-flex align-items-center justify-content-center gap-2 flex-grow-1">
-            <span class="bi bi-people" aria-hidden="true"></span> Clientes
-        </a>
+<section>
+    <h2 class="h5 fw-bold mb-3">Accesos rápidos</h2>
+    <div class="row row-cols-1 row-cols-lg-5 g-3">
+        <div class="col d-flex">
+            <a href="/Solicitud/Create" class="btn btn-light bg-white border-0 rounded-3 shadow-sm p-3 fw-bold d-flex align-items-center justify-content-center gap-2 w-100 h-100">
+                <span class="bi bi-file-earmark-text fs-4 text-primary" aria-hidden="true"></span> Nueva solicitud
+            </a>
+        </div>
+        <div class="col d-flex">
+            <a href="/Agenda/Create" class="btn btn-light bg-white border-0 rounded-3 shadow-sm p-3 fw-bold d-flex align-items-center justify-content-center gap-2 w-100 h-100">
+                <span class="bi bi-calendar-plus fs-4 text-primary" aria-hidden="true"></span> Crear visita
+            </a>
+        </div>
+        <div class="col d-flex">
+            <a href="/Levantamiento/Create" class="btn btn-light bg-white border-0 rounded-3 shadow-sm p-3 fw-bold d-flex align-items-center justify-content-center gap-2 w-100 h-100">
+                <span class="bi bi-compass fs-4 text-primary" aria-hidden="true"></span> Nuevo levantamiento
+            </a>
+        </div>
+        <div class="col d-flex">
+            <a href="/OrdenTrabajo/Index" class="btn btn-light bg-white border-0 rounded-3 shadow-sm p-3 fw-bold d-flex align-items-center justify-content-center gap-2 w-100 h-100">
+                <span class="bi bi-clipboard-check fs-4 text-primary" aria-hidden="true"></span> Órdenes de trabajo
+            </a>
+        </div>
+        <div class="col d-flex">
+            <a href="/Cliente/Index" class="btn btn-light bg-white border-0 rounded-3 shadow-sm p-3 fw-bold d-flex align-items-center justify-content-center gap-2 w-100 h-100">
+                <span class="bi bi-people fs-4 text-primary" aria-hidden="true"></span> Clientes
+            </a>
+        </div>
     </div>
 </section>
 
