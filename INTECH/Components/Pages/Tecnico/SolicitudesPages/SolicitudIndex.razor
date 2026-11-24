@@ -2,6 +2,7 @@
 @attribute [Authorize(Roles = "Técnico")]
 
 @inject SolicitudesService solicitudesService
+@inject EstadosSolicitudesService estadosSolicitudesService
 @inject ToastService toastService
 
 <PageTitle>Registro de Solicitudes</PageTitle>
@@ -51,6 +52,16 @@
                     <label class="col-form-label"><strong>Hasta</strong></label>
                     <InputDate class="form-control" @bind-Value="Hasta"></InputDate>
                 </div>
+                <div class="col-3">
+                    <label class="col-form-label"><strong>Estado</strong></label>
+                    <InputSelect class="form-select" @bind-Value="EstadoFiltroId">
+                        <option value="0">Todos los estados</option>
+                        @foreach (var estadoSolicitud in ListaEstadosSolicitudes)
+                        {
+                            <option value="@estadoSolicitud.EstadoSolicitudId">@estadoSolicitud.Nombre</option>
+                        }
+                    </InputSelect>
+                </div>
             </div>
 
             @* Tabla *@
@@ -65,10 +76,7 @@
                     </TemplateColumn>
                     <TemplateColumn Title="Opciones" Align="Align.Center">
                         <div class="d-flex text-nowrap">
-                            <button type="button" class="btn btn-outline-primary bi bi-eye"
-                                    data-bs-toggle="modal" data-bs-target="#modalDetalleSolicitud"
-                                    @onclick="() => SolicitudSeleccionada = context"></button>
-                            <a href="/Solicitud/Edit/@context.SolicitudId" class="btn btn-outline-primary bi bi-pencil-square ms-2"></a>
+                            <a href="/Solicitud/Edit/@context.SolicitudId" class="btn btn-outline-primary bi bi-pencil-square"></a>
                             <button type="button" class="btn btn-outline-danger bi bi-trash ms-2"
                                     data-bs-toggle="modal" data-bs-target="#modalEliminarSolicitud"
                                     @onclick="() => solicitudIdAEliminar = context.SolicitudId"></button>
@@ -82,64 +90,6 @@
             <label>Cantidad:  @ListaSolicitudes.Count</label>
         </div>
     </div>
-</div>
-
-@* Modal de detalle *@
-<div class="modal fade" id="modalDetalleSolicitud" tabindex="-1" aria-labelledby="modalDetalleSolicitudLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <div>
-          <h1 class="modal-title fs-5" id="modalDetalleSolicitudLabel">Detalle de la Solicitud</h1>
-          <small class="text-body-secondary">Solicitud @SolicitudSeleccionada.SolicitudId</small>
-        </div>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div class="row g-3">
-          <div class="col-12 col-md-6">
-            <div class="border rounded bg-light p-3 h-100">
-              <small class="text-uppercase text-body-secondary fw-bold">Cliente</small>
-              <p class="mb-0 fw-semibold">@SolicitudSeleccionada.Cliente?.Nombre</p>
-            </div>
-          </div>
-          <div class="col-12 col-md-6">
-            <div class="border rounded bg-light p-3 h-100">
-              <small class="text-uppercase text-body-secondary fw-bold">Contacto</small>
-              <p class="mb-0 fw-semibold">@SolicitudSeleccionada.Cliente?.TelefonosClientes.FirstOrDefault(t => t.EsPrincipal)?.Numero</p>
-            </div>
-          </div>
-          <div class="col-12 col-md-6">
-            <div class="border rounded bg-light p-3 h-100">
-              <small class="text-uppercase text-body-secondary fw-bold">Tipo de Servicio</small>
-              <p class="mb-0 fw-semibold">@SolicitudSeleccionada.TipoServicio</p>
-            </div>
-          </div>
-          <div class="col-12 col-md-6">
-            <div class="border rounded bg-light p-3 h-100">
-              <small class="text-uppercase text-body-secondary fw-bold">Dirección</small>
-              <p class="mb-0 fw-semibold">@SolicitudSeleccionada.Direccion</p>
-            </div>
-          </div>
-          <div class="col-12 col-md-6">
-            <div class="border rounded bg-light p-3 h-100">
-              <small class="text-uppercase text-body-secondary fw-bold">Fecha de Solicitud</small>
-              <p class="mb-0 fw-semibold">@SolicitudSeleccionada.FechaSolicitud.ToString("dd/MM/yyyy")</p>
-            </div>
-          </div>
-          <div class="col-12 col-md-6">
-            <div class="border rounded bg-light p-3 h-100">
-              <small class="text-uppercase text-body-secondary fw-bold">Estado</small>
-              <p class="mb-0 fw-semibold">@SolicitudSeleccionada.EstadoSolicitud?.Nombre</p>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-      </div>
-    </div>
-  </div>
 </div>
 
 @* Modal de eliminación *@
@@ -163,15 +113,20 @@
 
 @code {
     public List<Solicitudes> ListaSolicitudes { get; set; } = new List<Solicitudes>();
-    public Solicitudes SolicitudSeleccionada { get; set; } = new Solicitudes();
+    public List<EstadosSolicitudes> ListaEstadosSolicitudes { get; set; } = new List<EstadosSolicitudes>();
     public string Filtro { get; set; } = string.Empty;
     public string ValorFiltro { get; set; } = string.Empty;
     public DateTime? Desde { get; set; }
     public DateTime? Hasta { get; set; }
+    public int EstadoFiltroId { get; set; }
     private int solicitudIdAEliminar;
 
     protected override async Task OnInitializedAsync()
     {
+        var estadosSolicitudesResult = await estadosSolicitudesService.GetList(e => true);
+        estadosSolicitudesResult.OnSuccess(estadosSolicitudes => ListaEstadosSolicitudes = estadosSolicitudes);
+        estadosSolicitudesResult.OnFailure(() => toastService.ShowError("No se pudieron consultar los estados."));
+
         await CargarSolicitudes();
         Desde = null;
         Hasta = null;
@@ -186,16 +141,28 @@
 
     private string ObtenerColorEstado(int estadoSolicitudId)
     {
-        if (estadoSolicitudId == 2)
+        if (estadoSolicitudId == 1)
         {
-            return "text-bg-success";
+            return "bg-warning-subtle text-warning-emphasis";
+        }
+        else if (estadoSolicitudId == 2)
+        {
+            return "bg-primary-subtle text-primary-emphasis";
         }
         else if (estadoSolicitudId == 3)
         {
-            return "text-bg-danger";
+            return "bg-primary bg-opacity-10 text-primary";
+        }
+        else if (estadoSolicitudId == 5)
+        {
+            return "bg-warning-subtle text-danger-emphasis";
+        }
+        else if (estadoSolicitudId == 9)
+        {
+            return "bg-success-subtle text-success-emphasis";
         }
 
-        return "text-bg-warning";
+        return "bg-danger-subtle text-danger-emphasis";
     }
 
     private async Task Eliminar()
@@ -233,6 +200,19 @@
             solicitudesPorFechaResult.OnFailure(() =>
                 toastService.ShowError("No se pudieron consultar las solicitudes."));
         }
+        else if (Filtro == "Estado")
+        {
+            if (EstadoFiltroId == 0)
+            {
+                await CargarSolicitudes();
+                return;
+            }
+
+            var solicitudesPorEstadoResult = await solicitudesService.GetList(s => s.EstadoSolicitudId == EstadoFiltroId);
+            solicitudesPorEstadoResult.OnSuccess(solicitudes => ListaSolicitudes = solicitudes);
+            solicitudesPorEstadoResult.OnFailure(() =>
+                toastService.ShowError("No se pudieron consultar las solicitudes."));
+        }
         else if (valor == "")
         {
             await CargarSolicitudes();
@@ -262,13 +242,6 @@
             var solicitudesPorTipoResult = await solicitudesService.GetList(s => s.TipoServicio.ToLower().Contains(valor));
             solicitudesPorTipoResult.OnSuccess(solicitudes => ListaSolicitudes = solicitudes);
             solicitudesPorTipoResult.OnFailure(() =>
-                toastService.ShowError("No se pudieron consultar las solicitudes."));
-        }
-        else if (Filtro == "Estado")
-        {
-            var solicitudesPorEstadoResult = await solicitudesService.GetList(s => s.EstadoSolicitud.Nombre.ToLower().Contains(valor));
-            solicitudesPorEstadoResult.OnSuccess(solicitudes => ListaSolicitudes = solicitudes);
-            solicitudesPorEstadoResult.OnFailure(() =>
                 toastService.ShowError("No se pudieron consultar las solicitudes."));
         }
         else
