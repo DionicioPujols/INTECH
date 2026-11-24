@@ -1,0 +1,99 @@
+@page "/Solicitud/Create"
+@attribute [Authorize(Roles = "Técnico")]
+
+@inject SolicitudesService solicitudesService
+@inject ClientesService clientesService
+@inject NavigationManager navigationManager
+@inject ToastService toastService
+
+<PageTitle>Crear Solicitud</PageTitle>
+<EditForm Model="Solicitud" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+
+    <div class="container">
+        <div class="card shadow-lg">
+            <div class="card-header text-center">
+                <h5 class="card-title">Crear Solicitud</h5>
+            </div>
+
+            <div class="card-body">
+
+                @* Cliente *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Cliente</strong></label>
+                    <InputSelect class="form-control form-select" @bind-Value="Solicitud.ClienteId" @bind-Value:after="CargarDireccion">
+                        <option value="0" selected disabled>Elija un Cliente</option>
+                        @foreach (var cliente in ListaClientes)
+                        {
+                            <option value="@cliente.ClienteId">@cliente.Nombre</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="(() => Solicitud.ClienteId)" />
+                </div>
+
+                @* Tipo de Servicio *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Tipo de Servicio</strong></label>
+                    <InputText class="form-control" @bind-Value="Solicitud.TipoServicio" placeholder="Ej.: Instalación de Paneles Solares"></InputText>
+                    <ValidationMessage For="(() => Solicitud.TipoServicio)" />
+                </div>
+
+                @* Dirección del Servicio *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Dirección del Servicio</strong></label>
+                    <InputText class="form-control" @bind-Value="Solicitud.Direccion" placeholder="Ej.: Calle Principal #12, Santiago"></InputText>
+                    <ValidationMessage For="(() => Solicitud.Direccion)" />
+                </div>
+
+                @* Fecha de Solicitud *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Fecha de Solicitud</strong></label>
+                    <InputDate class="form-control" @bind-Value="Solicitud.FechaSolicitud"></InputDate>
+                    <ValidationMessage For="(() => Solicitud.FechaSolicitud)" />
+                </div>
+
+            </div>
+
+            @* Botones de Acción *@
+            <div class="card-footer text-center mt-2">
+                <a href="/Solicitud/Index" class="btn btn-secondary"> <span class="bi bi-arrow-left"></span> Volver</a>
+                <button type="submit" class="btn btn-primary bi bi-floppy"> Guardar</button>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    public Solicitudes Solicitud { get; set; } = new Solicitudes();
+    public List<Clientes> ListaClientes { get; set; } = new List<Clientes>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var clientesResult = await clientesService.GetList(c => true);
+        clientesResult.OnSuccess(clientes => ListaClientes = clientes);
+        clientesResult.OnFailure(() => toastService.ShowError("No se pudieron consultar los clientes."));
+    }
+
+    private void CargarDireccion()
+    {
+        var cliente = ListaClientes.FirstOrDefault(c => c.ClienteId == Solicitud.ClienteId);
+        if (cliente != null && Solicitud.Direccion.Trim() == "")
+        {
+            Solicitud.Direccion = cliente.Direccion;
+        }
+    }
+
+    public async Task Guardar()
+    {
+        Solicitud.TipoServicio = Solicitud.TipoServicio.Trim();
+        Solicitud.Direccion = Solicitud.Direccion.Trim();
+
+        var creadoResult = await solicitudesService.Guardar(Solicitud);
+        creadoResult.OnSuccess(() =>
+        {
+            toastService.ShowSuccess("Solicitud guardada correctamente.");
+            navigationManager.NavigateTo("/Solicitud/Index");
+        });
+        creadoResult.OnFailure(() => toastService.ShowError("No se pudo guardar la solicitud."));
+    }
+}

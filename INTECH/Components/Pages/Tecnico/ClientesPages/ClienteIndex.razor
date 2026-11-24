@@ -9,7 +9,7 @@
     <div class="card shadow-lg">
         <div class="card-header d-flex justify-content-between align-center mb-4">
             <h5 class="card-title">Registro de Clientes</h5>
-            <a href="/Cliente/Create" class="btn btn-primary"> <span class="bi bi-plus-square mt-3"></span> Crear</a>
+            <a href="/Cliente/Create" class="btn btn-primary"> <span class="bi bi-plus-square mt-3"></span> Crear Cliente</a>
         </div>
 
         @* Filtro *@
@@ -55,7 +55,7 @@
                     </TemplateColumn>
                     <PropertyColumn Property="@(c => c.Direccion)" Title="Dirección" Sortable="true" />
                     <TemplateColumn Title="Servicios">
-                        @context.Solicitudes.Count(s => !s.IsDeleted && s.EstadoSolicitudId == 2)
+                        @context.Solicitudes.Count(s => !s.IsDeleted && s.EstadoSolicitudId == 9)
                     </TemplateColumn>
                     <TemplateColumn Title="Opciones" Align="Align.Center">
                         <div class="d-flex text-nowrap">
