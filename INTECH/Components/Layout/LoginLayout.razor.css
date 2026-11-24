@@ -1,0 +1,131 @@
+.login-layout {
+    min-height: 100dvh;
+    color: #1c1c27;
+}
+
+.login-identidad {
+    background: #463bc4;
+    padding: 2rem 1.5rem;
+}
+
+.login-marca .tecnico-marca {
+    color: #ff292f;
+    font-size: clamp(3rem, 6vw, 5.5rem);
+    font-weight: 900;
+    font-style: italic;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+}
+
+.login-marca p {
+    font-size: clamp(1rem, 1.9vw, 1.9rem);
+    font-weight: 500;
+}
+
+.login-ilustracion {
+    display: none;
+    width: 100%;
+    max-width: 900px;
+}
+
+.login-acceso {
+    padding: 3rem 1.5rem;
+    flex: 1;
+}
+
+.login-formulario {
+    max-width: 525px;
+}
+
+.login-formulario ::deep h1 {
+    font-size: clamp(2rem, 3vw, 3rem);
+    margin-bottom: 2.5rem;
+}
+
+.login-formulario ::deep .login-campo {
+    margin-bottom: 1.75rem;
+}
+
+.login-formulario ::deep .form-label,
+.login-formulario ::deep .form-check-label,
+.login-formulario ::deep .form-control,
+.login-formulario ::deep .btn,
+.login-formulario ::deep .login-recuperar {
+    font-size: clamp(1rem, 1.5vw, 1.4rem);
+}
+
+.login-formulario ::deep .form-control {
+    min-height: 58px;
+    padding: 0.75rem 1.25rem;
+    border-color: #89899f;
+    border-radius: 6px;
+}
+
+.login-formulario ::deep .form-control::placeholder {
+    color: #606079;
+    opacity: 1;
+}
+
+.login-formulario ::deep .form-check {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding-left: 0;
+    margin: 2rem 0;
+}
+
+.login-formulario ::deep .form-check-input {
+    float: none;
+    width: 1.65rem;
+    height: 1.65rem;
+    margin: 0;
+    border-color: #89899f;
+    flex-shrink: 0;
+}
+
+.login-formulario ::deep .form-check-input:checked {
+    background-color: #463bc4;
+    border-color: #463bc4;
+}
+
+.login-formulario ::deep .btn {
+    min-height: 60px;
+    border-radius: 6px;
+}
+
+.login-formulario ::deep .login-recuperar {
+    display: block;
+    margin-top: 1.75rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.login-formulario ::deep .login-recuperar:hover {
+    text-decoration: underline;
+}
+
+.login-formulario ::deep .form-control:focus,
+.login-formulario ::deep .form-check-input:focus,
+.login-formulario ::deep .btn:focus-visible {
+    border-color: #463bc4;
+    box-shadow: 0 0 0 0.2rem rgb(70 59 196 / 22%);
+}
+
+@media (min-width: 992px) {
+    .login-identidad {
+        width: 53.33%;
+        flex-shrink: 0;
+        min-height: 100dvh;
+        justify-content: space-between;
+        padding: clamp(3rem, 11vh, 7rem) 1rem clamp(2rem, 7vh, 5rem);
+        gap: 4rem;
+    }
+
+    .login-ilustracion {
+        display: block;
+    }
+
+    .login-acceso {
+        padding: 4rem clamp(2rem, 6vw, 8rem);
+    }
+}
