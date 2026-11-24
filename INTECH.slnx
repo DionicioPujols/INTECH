@@ -1,3 +1,4 @@
 <Solution>
-  <Project Path="INTECH.csproj" />
+  <Project Path="INTECH.Test/INTECH.Test.csproj" Id="a3727a88-1c95-495d-a31b-1efbc1149917" />
+  <Project Path="INTECH/INTECH.csproj" />
 </Solution>
