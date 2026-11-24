@@ -10,7 +10,7 @@
 
 .login-marca .tecnico-marca {
     color: #ff292f;
-    font-size: clamp(3rem, 6vw, 5.5rem);
+    font-size: clamp(3rem, 4.5vw, 4.125rem);
     font-weight: 900;
     font-style: italic;
     line-height: 1.1;
@@ -18,14 +18,14 @@
 }
 
 .login-marca p {
-    font-size: clamp(1rem, 1.9vw, 1.9rem);
+    font-size: clamp(1rem, 1.425vw, 1.425rem);
     font-weight: 500;
 }
 
 .login-ilustracion {
     display: none;
     width: 100%;
-    max-width: 900px;
+    max-width: 675px;
 }
 
 .login-acceso {
@@ -34,16 +34,16 @@
 }
 
 .login-formulario {
-    max-width: 525px;
+    max-width: 394px;
 }
 
 .login-formulario ::deep h1 {
-    font-size: clamp(2rem, 3vw, 3rem);
-    margin-bottom: 2.5rem;
+    font-size: clamp(2rem, 2.25vw, 2.25rem);
+    margin-bottom: 1.875rem;
 }
 
 .login-formulario ::deep .login-campo {
-    margin-bottom: 1.75rem;
+    margin-bottom: 1.3125rem;
 }
 
 .login-formulario ::deep .form-label,
@@ -51,12 +51,12 @@
 .login-formulario ::deep .form-control,
 .login-formulario ::deep .btn,
 .login-formulario ::deep .login-recuperar {
-    font-size: clamp(1rem, 1.5vw, 1.4rem);
+    font-size: clamp(1rem, 1.125vw, 1.05rem);
 }
 
 .login-formulario ::deep .form-control {
-    min-height: 58px;
-    padding: 0.75rem 1.25rem;
+    min-height: 44px;
+    padding: 0.5625rem 0.9375rem;
     border-color: #89899f;
     border-radius: 6px;
 }
@@ -69,15 +69,15 @@
 .login-formulario ::deep .form-check {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.75rem;
     padding-left: 0;
-    margin: 2rem 0;
+    margin: 1.5rem 0;
 }
 
 .login-formulario ::deep .form-check-input {
     float: none;
-    width: 1.65rem;
-    height: 1.65rem;
+    width: 1.25rem;
+    height: 1.25rem;
     margin: 0;
     border-color: #89899f;
     flex-shrink: 0;
@@ -89,13 +89,13 @@
 }
 
 .login-formulario ::deep .btn {
-    min-height: 60px;
+    min-height: 45px;
     border-radius: 6px;
 }
 
 .login-formulario ::deep .login-recuperar {
     display: block;
-    margin-top: 1.75rem;
+    margin-top: 1.3125rem;
     font-weight: 600;
     text-decoration: none;
 }
@@ -118,11 +118,13 @@
         min-height: 100dvh;
         justify-content: space-between;
         padding: clamp(3rem, 11vh, 7rem) 1rem clamp(2rem, 7vh, 5rem);
-        gap: 4rem;
+        gap: 2rem;
     }
 
     .login-ilustracion {
         display: block;
+        max-height: calc(100dvh - 240px);
+        object-fit: contain;
     }
 
     .login-acceso {
