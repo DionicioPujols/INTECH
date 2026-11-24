@@ -1,20 +1,16 @@
 @inherits LayoutComponentBase
 
-<main class="tecnico-layout min-vh-100 bg-white position-relative d-flex justify-content-center align-items-center py-4">
-    <img src="@Assets["login-servicios.png"]" alt="" aria-hidden="true" class="position-absolute top-0 start-0 w-100 h-100 object-fit-cover opacity-50" />
-    <div class="container position-relative">
-        <div class="row justify-content-center">
-            <div class="col-12 col-sm-9 col-md-7 col-lg-5 col-xl-4">
-                <div class="card shadow-sm overflow-hidden">
-                    <div class="card-header tecnico-header text-center text-white py-4">
-                        <a href="Account/Login" class="tecnico-marca fs-1 fw-bold text-decoration-none">INTECH</a>
-                        <p class="mb-0">Ingeniería y Tecnología Hdez.</p>
-                    </div>
-                    <div class="card-body p-4">
-                        @Body
-                    </div>
-                </div>
-            </div>
+<main class="tecnico-layout login-layout d-flex flex-column flex-lg-row">
+    <section class="login-identidad d-flex flex-column align-items-center text-center text-white" aria-label="INTECH Ingeniería y Tecnología Hdez.">
+        <div class="login-marca">
+            <a href="Account/Login" class="tecnico-marca text-decoration-none">INTECH</a>
+            <p class="mb-0">Ingeniería y Tecnología Hdez.</p>
         </div>
-    </div>
+        <img src="@Assets["login-equipos.svg"]" alt="" aria-hidden="true" class="login-ilustracion" />
+    </section>
+    <section class="login-acceso d-flex align-items-center justify-content-center bg-white" aria-label="Acceso al sistema">
+        <div class="login-formulario w-100">
+            @Body
+        </div>
+    </section>
 </main>

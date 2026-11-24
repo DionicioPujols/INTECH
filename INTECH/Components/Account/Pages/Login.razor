@@ -13,30 +13,30 @@
 
 <PageTitle>Iniciar sesión | INTECH</PageTitle>
 
-<h1 class="h4 fw-bold text-center mb-4">Iniciar sesión</h1>
+<h1 class="fw-bold text-center">Iniciar sesión</h1>
 <StatusMessage Message="@errorMessage" />
 <EditForm EditContext="editContext" method="post" OnSubmit="LoginUser" FormName="login">
     <DataAnnotationsValidator />
     <div role="alert" aria-atomic="true">
         <ValidationSummary class="text-danger" />
     </div>
-    <div class="mb-3">
+    <div class="login-campo">
         <label for="Input.UserName" class="form-label fw-bold">Usuario</label>
         <InputText @bind-Value="Input.UserName" id="Input.UserName" class="form-control" autocomplete="username" aria-required="true" placeholder="Escribe tu usuario" />
         <ValidationMessage For="() => Input.UserName" class="text-danger" />
     </div>
-    <div class="mb-3">
+    <div class="login-campo">
         <label for="Input.Password" class="form-label fw-bold">Contraseña</label>
         <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Escribe tu contraseña" />
         <ValidationMessage For="() => Input.Password" class="text-danger" />
     </div>
-    <div class="form-check mb-4">
+    <div class="form-check">
         <InputCheckbox @bind-Value="Input.RememberMe" id="Input.RememberMe" class="form-check-input" />
         <label for="Input.RememberMe" class="form-check-label">Recordarme</label>
     </div>
-    <div class="d-flex flex-column gap-3">
+    <div>
         <button type="submit" class="w-100 btn btn-primary fw-bold">Iniciar sesión</button>
-        <a href="Account/ForgotPassword" class="text-center">¿Olvidaste tu contraseña?</a>
+        <a href="Account/ForgotPassword" class="login-recuperar text-center">¿Olvidaste tu contraseña?</a>
     </div>
 </EditForm>
 
