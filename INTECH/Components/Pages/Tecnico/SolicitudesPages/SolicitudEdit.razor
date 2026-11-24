@@ -2,15 +2,14 @@
 @attribute [Authorize(Roles = "Técnico")]
 
 @inject SolicitudesService solicitudesService
-@inject EstadosSolicitudesService estadosSolicitudesService
 @inject ClientesService clientesService
+@inject EstadosSolicitudesService estadosSolicitudesService
 @inject NavigationManager navigationManager
 @inject ToastService toastService
 
 <PageTitle>Modificar Solicitud</PageTitle>
 <EditForm Model="Solicitud" OnValidSubmit="Modificar">
     <DataAnnotationsValidator />
-    <ValidationSummary />
 
     <div class="container">
         <div class="card shadow-lg">
@@ -19,57 +18,46 @@
             </div>
 
             <div class="card-body">
+
                 @* Cliente *@
                 <div class="mb-3">
-                    <label class="form-label" for="NombreCliente"><strong>Cliente</strong></label>
-                    <InputSelect class="form-control form-select mb-2" @bind-Value="Solicitud.ClienteId" @bind-Value:after="SeleccionarCliente" aria-label="Cliente registrado">
-                        <option value="">Seleccione un cliente registrado</option>
-                        @if (Solicitud.ClienteId.HasValue && !ListaClientes.Any(c => c.ClienteId == Solicitud.ClienteId))
-                        {
-                            <option value="@Solicitud.ClienteId" disabled>@Solicitud.NombreCliente (cliente eliminado)</option>
-                        }
+                    <label class="form-label"><strong>Cliente</strong></label>
+                    <InputSelect class="form-control form-select" @bind-Value="Solicitud.ClienteId">
+                        <option value="0" selected disabled>Elija un Cliente</option>
                         @foreach (var cliente in ListaClientes)
                         {
                             <option value="@cliente.ClienteId">@cliente.Nombre</option>
                         }
                     </InputSelect>
-                    <InputText id="NombreCliente" class="form-control" @bind-Value="Solicitud.NombreCliente" maxlength="150"></InputText>
-                    <ValidationMessage For="(() => Solicitud.NombreCliente)" />
+                    <ValidationMessage For="(() => Solicitud.ClienteId)" />
                 </div>
 
-                @* Tipo de servicio *@
+                @* Tipo de Servicio *@
                 <div class="mb-3">
-                    <label class="form-label" for="TipoServicio"><strong>Tipo de servicio</strong></label>
-                    <InputText id="TipoServicio" class="form-control" @bind-Value="Solicitud.TipoServicio" maxlength="150"></InputText>
+                    <label class="form-label"><strong>Tipo de Servicio</strong></label>
+                    <InputText class="form-control" @bind-Value="Solicitud.TipoServicio" placeholder="Ej.: Instalación de Paneles Solares"></InputText>
                     <ValidationMessage For="(() => Solicitud.TipoServicio)" />
                 </div>
 
-                @* Contacto *@
+                @* Dirección del Servicio *@
                 <div class="mb-3">
-                    <label class="form-label" for="Contacto"><strong>Contacto</strong></label>
-                    <InputText id="Contacto" class="form-control" @bind-Value="Solicitud.Contacto" maxlength="50"></InputText>
-                    <ValidationMessage For="(() => Solicitud.Contacto)" />
-                </div>
-
-                @* Dirección *@
-                <div class="mb-3">
-                    <label class="form-label" for="Direccion"><strong>Dirección</strong></label>
-                    <InputText id="Direccion" class="form-control" @bind-Value="Solicitud.Direccion" maxlength="250"></InputText>
+                    <label class="form-label"><strong>Dirección del Servicio</strong></label>
+                    <InputText class="form-control" @bind-Value="Solicitud.Direccion" placeholder="Ej.: Calle Principal #12, Santiago"></InputText>
                     <ValidationMessage For="(() => Solicitud.Direccion)" />
                 </div>
 
-                @* Fecha de solicitud *@
+                @* Fecha de Solicitud *@
                 <div class="mb-3">
-                    <label class="form-label" for="FechaSolicitud"><strong>Fecha de solicitud</strong></label>
-                    <InputDate id="FechaSolicitud" class="form-control" @bind-Value="Solicitud.FechaSolicitud"></InputDate>
+                    <label class="form-label"><strong>Fecha de Solicitud</strong></label>
+                    <InputDate class="form-control" @bind-Value="Solicitud.FechaSolicitud"></InputDate>
                     <ValidationMessage For="(() => Solicitud.FechaSolicitud)" />
                 </div>
 
                 @* Estado *@
                 <div class="mb-3">
-                    <label class="form-label" for="EstadoSolicitudId"><strong>Estado</strong></label>
-                    <InputSelect id="EstadoSolicitudId" class="form-control form-select" @bind-Value="Solicitud.EstadoSolicitudId">
-                        <option value="0" disabled>Elija un Estado</option>
+                    <label class="form-label"><strong>Estado</strong></label>
+                    <InputSelect class="form-control form-select" @bind-Value="Solicitud.EstadoSolicitudId">
+                        <option value="0" selected disabled>Elija un Estado</option>
                         @foreach (var estadoSolicitud in ListaEstadosSolicitudes)
                         {
                             <option value="@estadoSolicitud.EstadoSolicitudId">@estadoSolicitud.Nombre</option>
@@ -78,19 +66,6 @@
                     <ValidationMessage For="(() => Solicitud.EstadoSolicitudId)" />
                 </div>
 
-                @* Fecha de fin *@
-                <div class="mb-3">
-                    <label class="form-label" for="FechaFin"><strong>Fecha de fin</strong></label>
-                    <InputDate id="FechaFin" class="form-control" @bind-Value="Solicitud.FechaFin"></InputDate>
-                    <ValidationMessage For="(() => Solicitud.FechaFin)" />
-                </div>
-
-                @* Técnico asignado *@
-                <div class="mb-3">
-                    <label class="form-label" for="TecnicoAsignado"><strong>Técnico asignado</strong></label>
-                    <InputText id="TecnicoAsignado" class="form-control" @bind-Value="Solicitud.TecnicoAsignado" maxlength="150"></InputText>
-                    <ValidationMessage For="(() => Solicitud.TecnicoAsignado)" />
-                </div>
             </div>
 
             @* Botones de Acción *@
@@ -98,8 +73,8 @@
                 <a href="/Solicitud/Index" class="btn btn-secondary">
                     <span class="bi bi-arrow-left"></span> Volver
                 </a>
-                <button disabled="@(!RendererInfo.IsInteractive)" type="submit" class="btn btn-primary bi bi-floppy"> Modificar</button>
-                <button disabled="@(!RendererInfo.IsInteractive)" type="button" class="btn btn-danger bi bi-trash" data-bs-toggle="modal" data-bs-target="#modalEliminarSolicitud"> Eliminar</button>
+                <button type="submit" class="btn btn-primary bi bi-floppy"> Modificar</button>
+                <button type="button" class="btn btn-danger bi bi-trash" data-bs-toggle="modal" data-bs-target="#modalEliminarSolicitud"> Eliminar</button>
             </div>
         </div>
     </div>
@@ -111,14 +86,14 @@
     <div class="modal-content">
       <div class="modal-header">
         <h1 class="modal-title fs-5" id="modalEliminarSolicitudLabel">Eliminar Solicitud</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         ¿Estás seguro de que deseas eliminar esta solicitud?
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button disabled="@(!RendererInfo.IsInteractive)" type="button" class="btn btn-danger" data-bs-dismiss="modal" @onclick="Eliminar">Sí, eliminar</button>
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal" @onclick="Eliminar">Sí, eliminar</button>
       </div>
     </div>
   </div>
@@ -134,89 +109,40 @@
 
     protected override async Task OnInitializedAsync()
     {
+        var result = await solicitudesService.Buscar(SolicitudId);
+        result.OnSuccess(solicitud => Solicitud = solicitud ?? new Solicitudes());
+
         var clientesResult = await clientesService.GetList(c => true);
         clientesResult.OnSuccess(clientes => ListaClientes = clientes);
-        clientesResult.OnFailure(() => toastService.ShowError("No se pudieron cargar los clientes."));
+        clientesResult.OnFailure(() => toastService.ShowError("No se pudieron consultar los clientes."));
 
         var estadosSolicitudesResult = await estadosSolicitudesService.GetList(e => true);
         estadosSolicitudesResult.OnSuccess(estadosSolicitudes => ListaEstadosSolicitudes = estadosSolicitudes);
-        estadosSolicitudesResult.OnFailure(() => toastService.ShowError("No se pudieron cargar los estados."));
-
-        var result = await solicitudesService.Buscar(SolicitudId);
-        result.OnSuccess(solicitud =>
-        {
-            if (solicitud is null)
-            {
-                toastService.ShowError("No se encontró la solicitud.");
-                navigationManager.NavigateTo("/Solicitud/Index");
-                return;
-            }
-
-            Solicitud = solicitud;
-        });
-        result.OnFailure(() => toastService.ShowError("No se pudo cargar la solicitud."));
-    }
-
-    private void SeleccionarCliente()
-    {
-        var cliente = ListaClientes.FirstOrDefault(c => c.ClienteId == Solicitud.ClienteId);
-        if (cliente != null)
-        {
-            Solicitud.NombreCliente = cliente.Nombre;
-            Solicitud.Direccion = cliente.Direccion;
-            Solicitud.Contacto = cliente.TelefonosClientes.FirstOrDefault(t => t.EsPrincipal)?.Numero ?? string.Empty;
-        }
+        estadosSolicitudesResult.OnFailure(() => toastService.ShowError("No se pudieron consultar los estados."));
     }
 
     public async Task Modificar()
     {
-        Solicitud.NombreCliente = Solicitud.NombreCliente?.Trim() ?? string.Empty;
-        Solicitud.TipoServicio = Solicitud.TipoServicio?.Trim() ?? string.Empty;
-        Solicitud.Contacto = Solicitud.Contacto?.Trim() ?? string.Empty;
-        Solicitud.Direccion = Solicitud.Direccion?.Trim() ?? string.Empty;
-        Solicitud.TecnicoAsignado = Solicitud.TecnicoAsignado?.Trim() ?? string.Empty;
-
-        if (Solicitud.FechaFin < Solicitud.FechaSolicitud)
-        {
-            toastService.ShowError("La fecha de fin no puede ser anterior a la fecha de solicitud.");
-            return;
-        }
+        Solicitud.TipoServicio = Solicitud.TipoServicio.Trim();
+        Solicitud.Direccion = Solicitud.Direccion.Trim();
 
         var result = await solicitudesService.Guardar(Solicitud);
-        if (result is Result<bool> operacionResult)
+        result.OnSuccess(() =>
         {
-            operacionResult.OnSuccess(realizado =>
-            {
-                if (!realizado)
-                {
-                    toastService.ShowError("No se pudo modificar la solicitud.");
-                    return;
-                }
-
-                toastService.ShowSuccess("Solicitud modificada correctamente.");
-                navigationManager.NavigateTo("/Solicitud/Index");
-            });
-        }
+            toastService.ShowSuccess("Solicitud modificada correctamente.");
+            navigationManager.NavigateTo("/Solicitud/Index");
+        });
         result.OnFailure(() => toastService.ShowError("No se pudo modificar la solicitud."));
     }
 
     private async Task Eliminar()
     {
         var result = await solicitudesService.Eliminar(SolicitudId);
-        if (result is Result<bool> operacionResult)
+        result.OnSuccess(() =>
         {
-            operacionResult.OnSuccess(realizado =>
-            {
-                if (!realizado)
-                {
-                    toastService.ShowError("No se pudo eliminar correctamente");
-                    return;
-                }
-
-                toastService.ShowSuccess("Solicitud eliminada correctamente.");
-                navigationManager.NavigateTo("/Solicitud/Index");
-            });
-        }
-        result.OnFailure(() => toastService.ShowError("No se pudo eliminar correctamente"));
+            toastService.ShowSuccess("Solicitud eliminada correctamente.");
+            navigationManager.NavigateTo("/Solicitud/Index");
+        });
+        result.OnFailure(() => toastService.ShowError("No se pudo eliminar la solicitud."));
     }
 }
