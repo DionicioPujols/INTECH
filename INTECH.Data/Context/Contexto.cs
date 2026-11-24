@@ -27,11 +27,46 @@ public class Contexto : DbContext
             new EstadosSolicitudes
             {
                 EstadoSolicitudId = 2,
-                Nombre = "Finalizada"
+                Nombre = "En proceso"
             },
             new EstadosSolicitudes
             {
                 EstadoSolicitudId = 3,
+                Nombre = "En Espera Administración"
+            },
+            new EstadosSolicitudes
+            {
+                EstadoSolicitudId = 4,
+                Nombre = "En revisión"
+            },
+            new EstadosSolicitudes
+            {
+                EstadoSolicitudId = 5,
+                Nombre = "Enviada al cliente"
+            },
+            new EstadosSolicitudes
+            {
+                EstadoSolicitudId = 6,
+                Nombre = "Aprobada"
+            },
+            new EstadosSolicitudes
+            {
+                EstadoSolicitudId = 7,
+                Nombre = "Rechazada"
+            },
+            new EstadosSolicitudes
+            {
+                EstadoSolicitudId = 8,
+                Nombre = "Pendiente de cobro"
+            },
+            new EstadosSolicitudes
+            {
+                EstadoSolicitudId = 9,
+                Nombre = "Finalizada"
+            },
+            new EstadosSolicitudes
+            {
+                EstadoSolicitudId = 10,
                 Nombre = "Cancelada"
             }
         );

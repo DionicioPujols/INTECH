@@ -16,7 +16,7 @@ partial class ContextoModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261124071440_NormalizarSolicitudes";
+    public override string LastMigrationId => "20261124072507_AgregarEstadosSolicitudes";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -89,11 +89,46 @@ partial class ContextoModelSnapshot : ModelSnapshot
                     new
                     {
                         EstadoSolicitudId = 2,
-                        Nombre = "Finalizada"
+                        Nombre = "En proceso"
                     },
                     new
                     {
                         EstadoSolicitudId = 3,
+                        Nombre = "En Espera Administración"
+                    },
+                    new
+                    {
+                        EstadoSolicitudId = 4,
+                        Nombre = "En revisión"
+                    },
+                    new
+                    {
+                        EstadoSolicitudId = 5,
+                        Nombre = "Enviada al cliente"
+                    },
+                    new
+                    {
+                        EstadoSolicitudId = 6,
+                        Nombre = "Aprobada"
+                    },
+                    new
+                    {
+                        EstadoSolicitudId = 7,
+                        Nombre = "Rechazada"
+                    },
+                    new
+                    {
+                        EstadoSolicitudId = 8,
+                        Nombre = "Pendiente de cobro"
+                    },
+                    new
+                    {
+                        EstadoSolicitudId = 9,
+                        Nombre = "Finalizada"
+                    },
+                    new
+                    {
+                        EstadoSolicitudId = 10,
                         Nombre = "Cancelada"
                     });
             });

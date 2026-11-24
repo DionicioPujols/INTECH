@@ -55,7 +55,7 @@
                     </TemplateColumn>
                     <PropertyColumn Property="@(c => c.Direccion)" Title="Dirección" Sortable="true" />
                     <TemplateColumn Title="Servicios">
-                        @context.Solicitudes.Count(s => !s.IsDeleted && s.EstadoSolicitudId == 2)
+                        @context.Solicitudes.Count(s => !s.IsDeleted && s.EstadoSolicitudId == 9)
                     </TemplateColumn>
                     <TemplateColumn Title="Opciones" Align="Align.Center">
                         <div class="d-flex text-nowrap">
