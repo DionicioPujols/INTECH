@@ -10,6 +10,8 @@ public class Solicitudes
 
     public bool IsDeleted { get; set; }
 
+    public int? ClienteId { get; set; }
+
     [Required(ErrorMessage = "Este Campo Es Requerido")]
     [StringLength(150, ErrorMessage = "El cliente no puede superar los 150 caracteres")]
     public string NombreCliente { get; set; } = string.Empty;
@@ -35,6 +37,10 @@ public class Solicitudes
 
     [StringLength(150, ErrorMessage = "El técnico asignado no puede superar los 150 caracteres")]
     public string TecnicoAsignado { get; set; } = string.Empty;
+
+    [ForeignKey("ClienteId")]
+    [InverseProperty("Solicitudes")]
+    public virtual Clientes? Cliente { get; set; }
 
     [ForeignKey("EstadoSolicitudId")]
     [InverseProperty("Solicitudes")]

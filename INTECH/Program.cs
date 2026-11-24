@@ -40,9 +40,9 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDbContextFactory<Contexto>(options =>
     options.UseSqlServer(ConStr));
 
-builder.Services.AddScoped<ModelosService>();
 builder.Services.AddScoped<EstadosSolicitudesService>();
 builder.Services.AddScoped<SolicitudesService>();
+builder.Services.AddScoped<ClientesService>();
 
 builder.Services.AddBlazorBootstrap();
 

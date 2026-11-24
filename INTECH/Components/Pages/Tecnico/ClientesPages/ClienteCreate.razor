@@ -1,0 +1,145 @@
+@page "/Cliente/Create"
+@attribute [Authorize(Roles = "Técnico")]
+
+@inject ClientesService clientesService
+@inject NavigationManager navigationManager
+@inject ToastService toastService
+
+<PageTitle>Crear Cliente</PageTitle>
+<EditForm Model="Cliente" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+
+    <div class="container">
+        <div class="card shadow-lg">
+            <div class="card-header text-center">
+                <h5 class="card-title">Crear Cliente</h5>
+            </div>
+
+            @* Nombre *@
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label"><strong>Nombre</strong></label>
+                    <InputText class="form-control" @bind-Value="Cliente.Nombre" placeholder="Ej.: Juan Pérez o Empresa XYZ, SRL"></InputText>
+                    <ValidationMessage For="(() => Cliente.Nombre)" />
+                </div>
+
+                @* Correo *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Correo</strong></label>
+                    <InputText class="form-control" @bind-Value="Cliente.Correo" placeholder="Ej.: cliente@correo.com"></InputText>
+                    <ValidationMessage For="(() => Cliente.Correo)" />
+                </div>
+
+                @* Teléfono principal *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Teléfono principal</strong></label>
+                    <InputText class="form-control" @bind-Value="TelefonoPrincipal.Numero" placeholder="Ej.: 809-555-1234"></InputText>
+                </div>
+
+                @* Teléfono alternativo *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Teléfono alternativo (opcional)</strong></label>
+                    <InputText class="form-control" @bind-Value="TelefonoAlternativo.Numero" placeholder="Ej.: 829-555-1234"></InputText>
+                </div>
+
+                @* RNC / Cédula *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>RNC / Cédula</strong></label>
+                    <InputText class="form-control" @bind-Value="Cliente.RncCedula" placeholder="Ej.: 402-1234567-1 (cédula) o 131-23456-7 (RNC)"></InputText>
+                    <ValidationMessage For="(() => Cliente.RncCedula)" />
+                </div>
+
+                @* Dirección *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Dirección</strong></label>
+                    <InputText class="form-control" @bind-Value="Cliente.Direccion" placeholder="Ej.: Calle Duarte #25, Santiago"></InputText>
+                    <ValidationMessage For="(() => Cliente.Direccion)" />
+                </div>
+            </div>
+
+            @* Botones de Acción *@
+            <div class="card-footer text-center mt-2">
+                <a href="/Cliente/Index" class="btn btn-secondary"> <span class="bi bi-arrow-left"></span> Volver</a>
+                <button type="submit" class="btn btn-primary bi bi-floppy"> Guardar</button>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    public Clientes Cliente { get; set; } = new Clientes();
+    public TelefonosClientes TelefonoPrincipal { get; set; } = new TelefonosClientes { EsPrincipal = true };
+    public TelefonosClientes TelefonoAlternativo { get; set; } = new TelefonosClientes();
+
+    public async Task Guardar()
+    {
+        Cliente.Nombre = Cliente.Nombre.Trim();
+        Cliente.Correo = Cliente.Correo.Trim();
+        Cliente.Direccion = Cliente.Direccion.Trim();
+        Cliente.RncCedula = Cliente.RncCedula.Replace("-", "").Trim();
+        TelefonoPrincipal.Numero = TelefonoPrincipal.Numero.Replace("-", "").Trim();
+        TelefonoAlternativo.Numero = TelefonoAlternativo.Numero.Replace("-", "").Trim();
+
+        if (!EsRncCedulaValido(Cliente.RncCedula))
+        {
+            toastService.ShowError("El RNC debe tener 9 dígitos y la cédula 11 dígitos.");
+            return;
+        }
+
+        if (!EsTelefonoValido(TelefonoPrincipal.Numero))
+        {
+            toastService.ShowError("El teléfono principal debe tener 10 dígitos y empezar por 809, 829 o 849.");
+            return;
+        }
+
+        if (TelefonoAlternativo.Numero != "" && !EsTelefonoValido(TelefonoAlternativo.Numero))
+        {
+            toastService.ShowError("El teléfono alternativo debe tener 10 dígitos y empezar por 809, 829 o 849.");
+            return;
+        }
+
+        if (TelefonoPrincipal.Numero == TelefonoAlternativo.Numero)
+        {
+            toastService.ShowError("El teléfono alternativo debe ser diferente al principal.");
+            return;
+        }
+
+        var rncCedulaExiste = await clientesService.ExisteRncCedula(Cliente.RncCedula);
+
+        if (rncCedulaExiste)
+        {
+            toastService.ShowError("Ya existe un cliente registrado con este RNC o cédula.");
+            return;
+        }
+
+        Cliente.TelefonosClientes.Add(TelefonoPrincipal);
+        if (TelefonoAlternativo.Numero != "")
+        {
+            Cliente.TelefonosClientes.Add(TelefonoAlternativo);
+        }
+
+        var creadoResult = await clientesService.Guardar(Cliente);
+        creadoResult.OnSuccess(() =>
+        {
+            toastService.ShowSuccess("Cliente guardado correctamente.");
+            navigationManager.NavigateTo("/Cliente/Index");
+        });
+        creadoResult.OnFailure(() => toastService.ShowError("No se pudo guardar el cliente."));
+    }
+
+    private bool EsRncCedulaValido(string rncCedula)
+    {
+        var soloNumeros = rncCedula.All(char.IsDigit);
+        var esRnc = rncCedula.Length == 9;
+        var esCedula = rncCedula.Length == 11;
+        return soloNumeros && (esRnc || esCedula);
+    }
+
+    private bool EsTelefonoValido(string numero)
+    {
+        var soloNumeros = numero.All(char.IsDigit);
+        var tieneDiezDigitos = numero.Length == 10;
+        var codigoDeArea = numero.StartsWith("809") || numero.StartsWith("829") || numero.StartsWith("849");
+        return soloNumeros && tieneDiezDigitos && codigoDeArea;
+    }
+}

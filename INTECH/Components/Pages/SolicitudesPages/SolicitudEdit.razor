@@ -3,6 +3,7 @@
 
 @inject SolicitudesService solicitudesService
 @inject EstadosSolicitudesService estadosSolicitudesService
+@inject ClientesService clientesService
 @inject NavigationManager navigationManager
 @inject ToastService toastService
 
@@ -21,6 +22,17 @@
                 @* Cliente *@
                 <div class="mb-3">
                     <label class="form-label" for="NombreCliente"><strong>Cliente</strong></label>
+                    <InputSelect class="form-control form-select mb-2" @bind-Value="Solicitud.ClienteId" @bind-Value:after="SeleccionarCliente" aria-label="Cliente registrado">
+                        <option value="">Seleccione un cliente registrado</option>
+                        @if (Solicitud.ClienteId.HasValue && !ListaClientes.Any(c => c.ClienteId == Solicitud.ClienteId))
+                        {
+                            <option value="@Solicitud.ClienteId" disabled>@Solicitud.NombreCliente (cliente eliminado)</option>
+                        }
+                        @foreach (var cliente in ListaClientes)
+                        {
+                            <option value="@cliente.ClienteId">@cliente.Nombre</option>
+                        }
+                    </InputSelect>
                     <InputText id="NombreCliente" class="form-control" @bind-Value="Solicitud.NombreCliente" maxlength="150"></InputText>
                     <ValidationMessage For="(() => Solicitud.NombreCliente)" />
                 </div>
@@ -117,10 +129,15 @@
     public int SolicitudId { get; set; }
 
     public Solicitudes Solicitud { get; set; } = new Solicitudes();
+    public List<Clientes> ListaClientes { get; set; } = new List<Clientes>();
     public List<EstadosSolicitudes> ListaEstadosSolicitudes { get; set; } = new List<EstadosSolicitudes>();
 
     protected override async Task OnInitializedAsync()
     {
+        var clientesResult = await clientesService.GetList(c => true);
+        clientesResult.OnSuccess(clientes => ListaClientes = clientes);
+        clientesResult.OnFailure(() => toastService.ShowError("No se pudieron cargar los clientes."));
+
         var estadosSolicitudesResult = await estadosSolicitudesService.GetList(e => true);
         estadosSolicitudesResult.OnSuccess(estadosSolicitudes => ListaEstadosSolicitudes = estadosSolicitudes);
         estadosSolicitudesResult.OnFailure(() => toastService.ShowError("No se pudieron cargar los estados."));
@@ -140,6 +157,17 @@
         result.OnFailure(() => toastService.ShowError("No se pudo cargar la solicitud."));
     }
 
+    private void SeleccionarCliente()
+    {
+        var cliente = ListaClientes.FirstOrDefault(c => c.ClienteId == Solicitud.ClienteId);
+        if (cliente != null)
+        {
+            Solicitud.NombreCliente = cliente.Nombre;
+            Solicitud.Direccion = cliente.Direccion;
+            Solicitud.Contacto = cliente.TelefonosClientes.FirstOrDefault(t => t.EsPrincipal)?.Numero ?? string.Empty;
+        }
+    }
+
     public async Task Modificar()
     {
         Solicitud.NombreCliente = Solicitud.NombreCliente?.Trim() ?? string.Empty;
@@ -155,22 +183,40 @@
         }
 
         var result = await solicitudesService.Guardar(Solicitud);
-        result.OnSuccess(() =>
+        if (result is Result<bool> operacionResult)
         {
-            toastService.ShowSuccess("Solicitud modificada correctamente.");
-            navigationManager.NavigateTo("/Solicitud/Index");
-        });
+            operacionResult.OnSuccess(realizado =>
+            {
+                if (!realizado)
+                {
+                    toastService.ShowError("No se pudo modificar la solicitud.");
+                    return;
+                }
+
+                toastService.ShowSuccess("Solicitud modificada correctamente.");
+                navigationManager.NavigateTo("/Solicitud/Index");
+            });
+        }
         result.OnFailure(() => toastService.ShowError("No se pudo modificar la solicitud."));
     }
 
     private async Task Eliminar()
     {
         var result = await solicitudesService.Eliminar(SolicitudId);
-        result.OnSuccess(() =>
+        if (result is Result<bool> operacionResult)
         {
-            toastService.ShowSuccess("Solicitud eliminada correctamente.");
-            navigationManager.NavigateTo("/Solicitud/Index");
-        });
+            operacionResult.OnSuccess(realizado =>
+            {
+                if (!realizado)
+                {
+                    toastService.ShowError("No se pudo eliminar correctamente");
+                    return;
+                }
+
+                toastService.ShowSuccess("Solicitud eliminada correctamente.");
+                navigationManager.NavigateTo("/Solicitud/Index");
+            });
+        }
         result.OnFailure(() => toastService.ShowError("No se pudo eliminar correctamente"));
     }
 }

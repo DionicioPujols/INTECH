@@ -16,7 +16,7 @@ partial class ContextoModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261123232555_AgregarClienteYTipoServicioSolicitudes";
+    public override string LastMigrationId => "20261124070953_EliminarModeloDeEjemplo";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -26,6 +26,42 @@ partial class ContextoModelSnapshot : ModelSnapshot
             .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
         SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+        modelBuilder.Entity("INTECH.Models.Clientes", b =>
+            {
+                var clienteId = b.Property<int>("ClienteId")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
+
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(clienteId);
+
+                b.Property<string>("Correo")
+                    .IsRequired()
+                    .HasMaxLength(150)
+                    .HasColumnType("nvarchar(150)");
+
+                b.Property<string>("Direccion")
+                    .IsRequired()
+                    .HasMaxLength(250)
+                    .HasColumnType("nvarchar(250)");
+
+                b.Property<bool>("IsDeleted")
+                    .HasColumnType("bit");
+
+                b.Property<string>("Nombre")
+                    .IsRequired()
+                    .HasMaxLength(150)
+                    .HasColumnType("nvarchar(150)");
+
+                b.Property<string>("RncCedula")
+                    .IsRequired()
+                    .HasMaxLength(13)
+                    .HasColumnType("nvarchar(13)");
+
+                b.HasKey("ClienteId");
+
+                b.ToTable("Clientes");
+            });
 
         modelBuilder.Entity("INTECH.Models.EstadosSolicitudes", b =>
             {
@@ -62,19 +98,6 @@ partial class ContextoModelSnapshot : ModelSnapshot
                     });
             });
 
-        modelBuilder.Entity("INTECH.Models.Modelo1", b =>
-            {
-                var modeloId = b.Property<int>("ModeloId")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
-
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(modeloId);
-
-                b.HasKey("ModeloId");
-
-                b.ToTable("Modelos");
-            });
-
         modelBuilder.Entity("INTECH.Models.Solicitudes", b =>
             {
                 var solicitudId = b.Property<int>("SolicitudId")
@@ -82,6 +105,9 @@ partial class ContextoModelSnapshot : ModelSnapshot
                     .HasColumnType("int");
 
                 SqlServerPropertyBuilderExtensions.UseIdentityColumn(solicitudId);
+
+                b.Property<int?>("ClienteId")
+                    .HasColumnType("int");
 
                 b.Property<string>("Contacto")
                     .IsRequired()
@@ -122,20 +148,75 @@ partial class ContextoModelSnapshot : ModelSnapshot
 
                 b.HasKey("SolicitudId");
 
+                b.HasIndex("ClienteId");
+
                 b.HasIndex("EstadoSolicitudId");
 
                 b.ToTable("Solicitudes");
             });
 
+        modelBuilder.Entity("INTECH.Models.TelefonosClientes", b =>
+            {
+                var telefonoClienteId = b.Property<int>("TelefonoClienteId")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
+
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(telefonoClienteId);
+
+                b.Property<int>("ClienteId")
+                    .HasColumnType("int");
+
+                b.Property<bool>("EsPrincipal")
+                    .HasColumnType("bit");
+
+                b.Property<bool>("IsDeleted")
+                    .HasColumnType("bit");
+
+                b.Property<string>("Numero")
+                    .IsRequired()
+                    .HasMaxLength(12)
+                    .HasColumnType("nvarchar(12)");
+
+                b.HasKey("TelefonoClienteId");
+
+                b.HasIndex("ClienteId");
+
+                b.ToTable("TelefonosClientes");
+            });
+
         modelBuilder.Entity("INTECH.Models.Solicitudes", b =>
             {
+                b.HasOne("INTECH.Models.Clientes", "Cliente")
+                    .WithMany("Solicitudes")
+                    .HasForeignKey("ClienteId");
+
                 b.HasOne("INTECH.Models.EstadosSolicitudes", "EstadoSolicitud")
                     .WithMany("Solicitudes")
                     .HasForeignKey("EstadoSolicitudId")
                     .OnDelete(DeleteBehavior.Cascade)
                     .IsRequired();
 
+                b.Navigation("Cliente");
+
                 b.Navigation("EstadoSolicitud");
+            });
+
+        modelBuilder.Entity("INTECH.Models.TelefonosClientes", b =>
+            {
+                b.HasOne("INTECH.Models.Clientes", "Cliente")
+                    .WithMany("TelefonosClientes")
+                    .HasForeignKey("ClienteId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("Cliente");
+            });
+
+        modelBuilder.Entity("INTECH.Models.Clientes", b =>
+            {
+                b.Navigation("Solicitudes");
+
+                b.Navigation("TelefonosClientes");
             });
 
         modelBuilder.Entity("INTECH.Models.EstadosSolicitudes", b =>
