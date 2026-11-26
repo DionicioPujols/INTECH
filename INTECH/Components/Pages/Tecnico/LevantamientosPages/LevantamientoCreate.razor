@@ -1,20 +1,115 @@
 @page "/Levantamiento/Create"
 @attribute [Authorize(Roles = "Técnico")]
 
-<PageTitle>Nuevo levantamiento | INTECH</PageTitle>
+@inject LevantamientosService levantamientosService
+@inject SolicitudesService solicitudesService
+@inject Microsoft.AspNetCore.Identity.UserManager<INTECH.Data.ApplicationUser> userManager
+@inject NavigationManager navigationManager
+@inject ToastService toastService
 
-<div class="container-fluid p-0">
-    <div class="card">
-        <div class="card-header text-center">
-            <h1 class="h4 fw-normal mb-0">Nuevo levantamiento</h1>
-        </div>
-        <div class="card-body d-flex flex-column gap-4">
-            <p class="text-body-secondary mb-0">Vista de diseño. El registro de datos estará disponible cuando se implemente este módulo.</p>
-            <p class="text-body-secondary mb-0">Los campos de este registro están pendientes de definir.</p>
-        </div>
-        <div class="card-footer d-flex justify-content-center gap-2">
-            <a href="/Levantamiento/Index" class="btn btn-secondary d-flex align-items-center gap-2"><span class="bi bi-arrow-left" aria-hidden="true"></span> Volver</a>
-            <button type="button" class="btn btn-primary d-flex align-items-center gap-2" disabled><span class="bi bi-floppy" aria-hidden="true"></span> Guardar</button>
+<PageTitle>Crear Levantamiento</PageTitle>
+<EditForm Model="Levantamiento" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+
+    <div class="container">
+        <div class="card shadow-lg">
+            <div class="card-header text-center">
+                <h5 class="card-title">Crear Levantamiento</h5>
+            </div>
+
+            <div class="card-body">
+
+                @* Solicitud *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Solicitud</strong></label>
+                    <InputSelect class="form-control form-select" @bind-Value="Levantamiento.SolicitudId">
+                        <option value="0" selected disabled>Elija una Solicitud</option>
+                        @foreach (var solicitud in ListaSolicitudes)
+                        {
+                            <option value="@solicitud.SolicitudId">Solicitud #@solicitud.SolicitudId - @solicitud.Cliente.Nombre (@solicitud.TipoServicio)</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="(() => Levantamiento.SolicitudId)" />
+                </div>
+
+                @* Técnico Asignado *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Técnico Asignado</strong></label>
+                    <InputSelect class="form-control form-select" @bind-Value="Levantamiento.TecnicoId">
+                        <option value="">Sin asignar</option>
+                        @foreach (var tecnico in ListaTecnicos)
+                        {
+                            <option value="@tecnico.Id">@tecnico.UserName</option>
+                        }
+                    </InputSelect>
+                </div>
+
+                @* Fecha Programada *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Fecha Programada</strong></label>
+                    <InputDate class="form-control" @bind-Value="Levantamiento.FechaProgramada"></InputDate>
+                    <ValidationMessage For="(() => Levantamiento.FechaProgramada)" />
+                </div>
+
+                @* Hora de Inicio *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Hora de Inicio</strong></label>
+                    <InputDate Type="InputDateType.Time" class="form-control" @bind-Value="Levantamiento.HoraInicio"></InputDate>
+                    <ValidationMessage For="(() => Levantamiento.HoraInicio)" />
+                </div>
+
+                @* Hora de Fin *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Hora de Fin</strong></label>
+                    <InputDate Type="InputDateType.Time" class="form-control" @bind-Value="Levantamiento.HoraFin"></InputDate>
+                    <ValidationMessage For="(() => Levantamiento.HoraFin)" />
+                </div>
+
+            </div>
+
+            @* Botones de Acción *@
+            <div class="card-footer text-center mt-2">
+                <a href="/Levantamiento/Index" class="btn btn-secondary"> <span class="bi bi-arrow-left"></span> Volver</a>
+                <button type="submit" class="btn btn-primary bi bi-floppy"> Guardar</button>
+            </div>
         </div>
     </div>
-</div>
+</EditForm>
+
+@code {
+    public Levantamientos Levantamiento { get; set; } = new Levantamientos();
+    public List<Solicitudes> ListaSolicitudes { get; set; } = new List<Solicitudes>();
+    public List<INTECH.Data.ApplicationUser> ListaTecnicos { get; set; } = new List<INTECH.Data.ApplicationUser>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var solicitudesResult = await solicitudesService.GetList(s => true);
+        solicitudesResult.OnSuccess(solicitudes => ListaSolicitudes = solicitudes);
+        solicitudesResult.OnFailure(() => toastService.ShowError("No se pudieron consultar las solicitudes."));
+
+        var tecnicos = await userManager.GetUsersInRoleAsync("Técnico");
+        ListaTecnicos = tecnicos.ToList();
+    }
+
+    public async Task Guardar()
+    {
+        if (Levantamiento.HoraFin <= Levantamiento.HoraInicio)
+        {
+            toastService.ShowError("La hora de fin debe ser mayor que la hora de inicio.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(Levantamiento.TecnicoId))
+        {
+            Levantamiento.TecnicoId = null;
+        }
+
+        var creadoResult = await levantamientosService.Guardar(Levantamiento);
+        creadoResult.OnSuccess(() =>
+        {
+            toastService.ShowSuccess("Levantamiento guardado correctamente.");
+            navigationManager.NavigateTo("/Levantamiento/Index");
+        });
+        creadoResult.OnFailure(() => toastService.ShowError("No se pudo guardar el levantamiento."));
+    }
+}
