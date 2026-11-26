@@ -38,4 +38,34 @@ public class HistorialesService(
         contexto.Historiales.Add(historial);
         return await contexto.SaveChangesAsync() > 0;
     }
+
+    private async Task<bool> Modificar(Historiales historial)
+    {
+        await using var contexto = await contextFactory.CreateDbContextAsync();
+        var historialExistente = await contexto.Historiales
+            .Include(h => h.HistorialesDetalle)
+            .SingleOrDefaultAsync(h => h.HistorialId == historial.HistorialId);
+        if (historialExistente == null)
+        {
+            return false;
+        }
+
+        historialExistente.SolicitudId = historial.SolicitudId;
+        historialExistente.TecnicoId = historial.TecnicoId;
+        historialExistente.FechaFinalizacion = historial.FechaFinalizacion;
+
+        contexto.RemoveRange(historialExistente.HistorialesDetalle);
+        foreach (var detalle in historial.HistorialesDetalle)
+        {
+            historialExistente.HistorialesDetalle.Add(new HistorialesDetalle
+            {
+                HistorialId = historialExistente.HistorialId,
+                Titulo = detalle.Titulo,
+                Descripcion = detalle.Descripcion,
+                Fecha = detalle.Fecha
+            });
+        }
+
+        return await contexto.SaveChangesAsync() > 0;
+    }
 }
