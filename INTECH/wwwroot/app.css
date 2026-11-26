@@ -181,6 +181,11 @@ html, body {
     --bs-btn-active-border-color: #c5242a;
 }
 
+.tecnico-layout .fc-grid-7 {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
 @media (min-width: 768px) {
     .tecnico-sidebar {
         width: 250px;
