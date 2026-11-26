@@ -55,6 +55,13 @@
                     <InputDate class="form-control" @bind-Value="Agenda.Fecha"></InputDate>
                     <ValidationMessage For="(() => Agenda.Fecha)" />
                 </div>
+
+                @* Hora de Inicio *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Hora de inicio *</strong></label>
+                    <InputDate Type="InputDateType.Time" class="form-control" @bind-Value="Agenda.HoraInicio"></InputDate>
+                    <ValidationMessage For="(() => Agenda.HoraInicio)" />
+                </div>
             </div>
         </div>
     </div>
