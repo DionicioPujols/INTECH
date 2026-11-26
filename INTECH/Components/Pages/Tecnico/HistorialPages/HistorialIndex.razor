@@ -167,4 +167,112 @@
 
         return "bg-danger-subtle text-danger-emphasis";
     }
+
+    private async Task Buscar()
+    {
+        var valor = ValorFiltro.Trim().ToLower();
+        if (Filtro == "Fecha")
+        {
+            if (Desde == null || Hasta == null)
+            {
+                toastService.ShowError("Seleccione las fechas desde y hasta.");
+                return;
+            }
+
+            if (Desde > Hasta)
+            {
+                toastService.ShowWarning("La fecha desde no puede ser mayor que la fecha hasta.");
+                return;
+            }
+
+            var historialesPorFechaResult = await historialesService.GetList(h =>
+                h.FechaFinalizacion >= Desde && h.FechaFinalizacion <= Hasta);
+            historialesPorFechaResult.OnSuccess(historiales => ListaHistoriales = historiales);
+            historialesPorFechaResult.OnFailure(() =>
+                toastService.ShowError("No se pudieron consultar los historiales."));
+        }
+        else if (Filtro == "TipoServicio")
+        {
+            if (TipoServicioFiltro != "")
+            {
+                var historialesPorTipoResult = await historialesService.GetList(h => h.Solicitud.TipoServicio == TipoServicioFiltro);
+                historialesPorTipoResult.OnSuccess(historiales => ListaHistoriales = historiales);
+                historialesPorTipoResult.OnFailure(() =>
+                    toastService.ShowError("No se pudieron consultar los historiales."));
+            }
+            else if (valor != "")
+            {
+                var historialesPorTipoResult = await historialesService.GetList(h => h.Solicitud.TipoServicio.ToLower().Contains(valor));
+                historialesPorTipoResult.OnSuccess(historiales => ListaHistoriales = historiales);
+                historialesPorTipoResult.OnFailure(() =>
+                    toastService.ShowError("No se pudieron consultar los historiales."));
+            }
+            else
+            {
+                await CargarHistoriales();
+            }
+        }
+        else if (Filtro == "Tecnico")
+        {
+            if (TecnicoFiltroId == "")
+            {
+                await CargarHistoriales();
+                return;
+            }
+            else if (TecnicoFiltroId == "SIN_ASIGNAR")
+            {
+                var historialesSinTecnicoResult = await historialesService.GetList(h => string.IsNullOrEmpty(h.TecnicoId));
+                historialesSinTecnicoResult.OnSuccess(historiales => ListaHistoriales = historiales);
+                historialesSinTecnicoResult.OnFailure(() =>
+                    toastService.ShowError("No se pudieron consultar los historiales."));
+                return;
+            }
+
+            var historialesPorTecnicoResult = await historialesService.GetList(h => h.TecnicoId == TecnicoFiltroId);
+            historialesPorTecnicoResult.OnSuccess(historiales => ListaHistoriales = historiales);
+            historialesPorTecnicoResult.OnFailure(() =>
+                toastService.ShowError("No se pudieron consultar los historiales."));
+        }
+        else if (valor == "")
+        {
+            await CargarHistoriales();
+        }
+        else if (Filtro == "HistorialId")
+        {
+            if (!int.TryParse(valor, out var historialId))
+            {
+                toastService.ShowError("Ingrese un número de historial válido.");
+                return;
+            }
+
+            var historialesPorIdResult = await historialesService.GetList(h => h.HistorialId == historialId);
+            historialesPorIdResult.OnSuccess(historiales => ListaHistoriales = historiales);
+            historialesPorIdResult.OnFailure(() =>
+                toastService.ShowError("No se pudieron consultar los historiales."));
+        }
+        else if (Filtro == "SolicitudId")
+        {
+            if (!int.TryParse(valor, out var solicitudId))
+            {
+                toastService.ShowError("Ingrese un número de solicitud válido.");
+                return;
+            }
+
+            var historialesPorSolicitudResult = await historialesService.GetList(h => h.SolicitudId == solicitudId);
+            historialesPorSolicitudResult.OnSuccess(historiales => ListaHistoriales = historiales);
+            historialesPorSolicitudResult.OnFailure(() =>
+                toastService.ShowError("No se pudieron consultar los historiales."));
+        }
+        else if (Filtro == "Cliente")
+        {
+            var historialesPorClienteResult = await historialesService.GetList(h => h.Solicitud.Cliente.Nombre.ToLower().Contains(valor));
+            historialesPorClienteResult.OnSuccess(historiales => ListaHistoriales = historiales);
+            historialesPorClienteResult.OnFailure(() =>
+                toastService.ShowError("No se pudieron consultar los historiales."));
+        }
+        else
+        {
+            toastService.ShowError("Seleccione un filtro.");
+        }
+    }
 }
