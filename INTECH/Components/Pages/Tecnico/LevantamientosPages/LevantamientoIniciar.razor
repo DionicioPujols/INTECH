@@ -8,7 +8,7 @@
 @inject ToastService toastService
 
 <PageTitle>Iniciar Levantamiento</PageTitle>
-<EditForm Model="Levantamiento">
+<EditForm Model="Levantamiento" OnValidSubmit="EnviarAdministracion">
     <DataAnnotationsValidator />
 
     <div class="container">
@@ -110,6 +110,8 @@
             @* Botones de Acción *@
             <div class="card-footer text-center mt-2">
                 <a href="/Levantamiento/Index" class="btn btn-secondary"> <span class="bi bi-x-lg"></span> Cancelar</a>
+                <button type="button" class="btn btn-outline-primary bi bi-floppy" @onclick="GuardarBorrador"> Guardar</button>
+                <button type="submit" class="btn btn-primary bi bi-send"> Enviar a Administración</button>
             </div>
         </div>
     </div>
@@ -175,5 +177,80 @@
     private void RemoverFoto(FotosLevantamientos foto)
     {
         Levantamiento.FotosLevantamientos.Remove(foto);
+    }
+
+    private void LimpiarCampos()
+    {
+        Levantamiento.DisponibilidadEspaciosFisicos = Levantamiento.DisponibilidadEspaciosFisicos.Trim();
+        Levantamiento.CargasElectricas = Levantamiento.CargasElectricas.Trim();
+        Levantamiento.EstabilidadTension = Levantamiento.EstabilidadTension.Trim();
+        Levantamiento.RecorridoTuberias = Levantamiento.RecorridoTuberias.Trim();
+        Levantamiento.RecorridoCableado = Levantamiento.RecorridoCableado.Trim();
+        Levantamiento.Observaciones = Levantamiento.Observaciones.Trim();
+    }
+
+    private async Task ActualizarEstadoSolicitud(int estadoSolicitudId)
+    {
+        Solicitudes? solicitud = null;
+        var solicitudResult = await solicitudesService.Buscar(Levantamiento.SolicitudId);
+        solicitudResult.OnSuccess(s => solicitud = s);
+        if (solicitud != null)
+        {
+            solicitud.EstadoSolicitudId = estadoSolicitudId;
+            await solicitudesService.Guardar(solicitud);
+        }
+    }
+
+    public async Task GuardarBorrador()
+    {
+        if (Levantamiento.LevantamientoId == 0)
+        {
+            toastService.ShowError("No se encontró el levantamiento.");
+            return;
+        }
+
+        LimpiarCampos();
+        Levantamiento.EsBorrador = true;
+
+        var result = await levantamientosService.Guardar(Levantamiento);
+        result.OnSuccess(() => toastService.ShowSuccess("Borrador del levantamiento guardado correctamente."));
+        result.OnFailure(() => toastService.ShowError("No se pudo guardar el borrador del levantamiento."));
+        if (result.IsSuccess)
+        {
+            await ActualizarEstadoSolicitud(2);
+            navigationManager.NavigateTo("/Levantamiento/Index");
+        }
+    }
+
+    public async Task EnviarAdministracion()
+    {
+        if (Levantamiento.LevantamientoId == 0)
+        {
+            toastService.ShowError("No se encontró el levantamiento.");
+            return;
+        }
+
+        LimpiarCampos();
+
+        if (Levantamiento.DisponibilidadEspaciosFisicos == "" ||
+            Levantamiento.CargasElectricas == "" ||
+            Levantamiento.EstabilidadTension == "" ||
+            Levantamiento.RecorridoTuberias == "" ||
+            Levantamiento.RecorridoCableado == "")
+        {
+            toastService.ShowError("Complete todos los campos obligatorios del levantamiento.");
+            return;
+        }
+
+        Levantamiento.EsBorrador = false;
+
+        var result = await levantamientosService.Guardar(Levantamiento);
+        result.OnSuccess(() => toastService.ShowSuccess("Levantamiento enviado a administración correctamente."));
+        result.OnFailure(() => toastService.ShowError("No se pudo enviar el levantamiento a administración."));
+        if (result.IsSuccess)
+        {
+            await ActualizarEstadoSolicitud(3);
+            navigationManager.NavigateTo("/Levantamiento/Index");
+        }
     }
 }
