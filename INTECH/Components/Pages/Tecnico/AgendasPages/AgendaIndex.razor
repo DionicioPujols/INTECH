@@ -276,4 +276,19 @@
     public string SolicitudIdFiltro { get; set; } = string.Empty;
     public string TecnicoFiltroId { get; set; } = string.Empty;
     private int agendaIdAEliminar;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var tecnicos = await userManager.GetUsersInRoleAsync("Técnico");
+        ListaTecnicos = tecnicos.ToList();
+
+        await CargarAgendas();
+    }
+
+    private async Task CargarAgendas()
+    {
+        var agendasResult = await agendasService.GetList(a => true);
+        agendasResult.OnSuccess(agendas => ListaAgendas = agendas);
+        agendasResult.OnFailure(() => toastService.ShowError("No se pudieron consultar las visitas."));
+    }
 }
