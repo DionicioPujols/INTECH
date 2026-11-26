@@ -68,4 +68,31 @@ public class HistorialesService(
 
         return await contexto.SaveChangesAsync() > 0;
     }
+
+    public async Task<Result<Historiales?>> Buscar(int historialId)
+    {
+        await using var contexto = await contextFactory.CreateDbContextAsync();
+        return await contexto.Historiales
+            .Include(h => h.Solicitud)
+                .ThenInclude(s => s.Cliente)
+            .Include(h => h.Solicitud)
+                .ThenInclude(s => s.EstadoSolicitud)
+            .Include(h => h.HistorialesDetalle)
+            .FirstOrDefaultAsync(h => h.HistorialId == historialId && !h.IsDeleted);
+    }
+
+    public async Task<Result<List<Historiales>>> GetList(Expression<Func<Historiales, bool>> criterio)
+    {
+        await using var contexto = await contextFactory.CreateDbContextAsync();
+        return await contexto.Historiales
+            .Include(h => h.Solicitud)
+                .ThenInclude(s => s.Cliente)
+            .Include(h => h.Solicitud)
+                .ThenInclude(s => s.EstadoSolicitud)
+            .Include(h => h.HistorialesDetalle)
+            .Where(h => !h.IsDeleted)
+            .Where(criterio)
+            .AsNoTracking()
+            .ToListAsync();
+    }
 }
