@@ -68,4 +68,18 @@ public class AgendasService(
                 .ThenInclude(s => s.EstadoSolicitud)
             .FirstOrDefaultAsync(a => a.AgendaId == agendaId && !a.IsDeleted);
     }
+
+    public async Task<Result<List<Agendas>>> GetList(Expression<Func<Agendas, bool>> criterio)
+    {
+        await using var contexto = await contextFactory.CreateDbContextAsync();
+        return await contexto.Agendas
+            .Include(a => a.Solicitud)
+                .ThenInclude(s => s.Cliente)
+            .Include(a => a.Solicitud)
+                .ThenInclude(s => s.EstadoSolicitud)
+            .Where(a => !a.IsDeleted)
+            .Where(criterio)
+            .AsNoTracking()
+            .ToListAsync();
+    }
 }
