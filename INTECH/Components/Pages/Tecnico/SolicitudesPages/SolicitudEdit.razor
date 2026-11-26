@@ -104,6 +104,12 @@
 
     public async Task Modificar()
     {
+        if (Solicitud.EstadoSolicitudId == 9)
+        {
+            toastService.ShowError("No se puede modificar una solicitud finalizada.");
+            return;
+        }
+
         Solicitud.TipoServicio = Solicitud.TipoServicio.Trim();
         Solicitud.Direccion = Solicitud.Direccion.Trim();
 
@@ -118,6 +124,22 @@
 
     private async Task Eliminar()
     {
+        if (Solicitud.EstadoSolicitudId == 2)
+        {
+            toastService.ShowError("No se puede eliminar una solicitud que está en proceso.");
+            return;
+        }
+        if (Solicitud.EstadoSolicitudId == 3)
+        {
+            toastService.ShowError("No se puede eliminar una solicitud que está en espera de administración.");
+            return;
+        }
+        if (Solicitud.EstadoSolicitudId == 9)
+        {
+            toastService.ShowError("No se puede eliminar una solicitud finalizada.");
+            return;
+        }
+
         var result = await solicitudesService.Eliminar(SolicitudId);
         result.OnSuccess(() =>
         {
