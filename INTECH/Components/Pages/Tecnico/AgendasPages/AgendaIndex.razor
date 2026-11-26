@@ -216,6 +216,14 @@
                             <small class="text-body-secondary d-block">Fecha</small>
                             <span>@VisitaSeleccionada.Fecha.ToString("dd/MM/yyyy")</span>
                         </div>
+                        <div class="mb-2">
+                            <small class="text-body-secondary d-block">Horario</small>
+                            <span>@VisitaSeleccionada.HoraInicio.ToString("hh:mm tt") - @VisitaSeleccionada.HoraFin.ToString("hh:mm tt")</span>
+                        </div>
+                        <div class="mb-3">
+                            <small class="text-body-secondary d-block">Técnico asignado</small>
+                            <span>@ObtenerNombreTecnico(VisitaSeleccionada.TecnicoId)</span>
+                        </div>
                     }
                 </div>
             </div>
