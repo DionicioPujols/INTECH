@@ -82,3 +82,21 @@
         </div>
     </div>
 </div>
+
+@code {
+    [Parameter]
+    public int HistorialId { get; set; }
+
+    public Historiales Historial { get; set; } = new Historiales();
+    public List<INTECH.Data.ApplicationUser> ListaTecnicos { get; set; } = new List<INTECH.Data.ApplicationUser>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await historialesService.Buscar(HistorialId);
+        result.OnSuccess(historial => Historial = historial ?? new Historiales());
+        result.OnFailure(() => toastService.ShowError("No se pudo consultar el detalle del historial."));
+
+        var tecnicos = await userManager.GetUsersInRoleAsync("Técnico");
+        ListaTecnicos = tecnicos.ToList();
+    }
+}
