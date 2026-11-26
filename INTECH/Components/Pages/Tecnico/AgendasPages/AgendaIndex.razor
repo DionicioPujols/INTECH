@@ -323,4 +323,22 @@
     {
         FechaReferencia = DateTime.Today;
     }
+
+    private List<DateTime> ObtenerDiasMes()
+    {
+        var primerDiaMes = new DateTime(FechaReferencia.Year, FechaReferencia.Month, 1);
+        int desplazamiento = ((int)primerDiaMes.DayOfWeek + 6) % 7;
+        var inicioCuadricula = primerDiaMes.AddDays(-desplazamiento);
+
+        return Enumerable.Range(0, 42)
+            .Select(i => inicioCuadricula.AddDays(i))
+            .ToList();
+    }
+
+    private List<DateTime> ObtenerDiasSemana()
+    {
+        int desplazamiento = ((int)FechaReferencia.DayOfWeek + 6) % 7;
+        var lunes = FechaReferencia.AddDays(-desplazamiento);
+        return Enumerable.Range(0, 7).Select(i => lunes.AddDays(i)).ToList();
+    }
 }
