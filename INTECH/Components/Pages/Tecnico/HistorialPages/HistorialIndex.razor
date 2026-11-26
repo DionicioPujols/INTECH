@@ -1,17 +1,15 @@
 @page "/Historial/Index"
 @attribute [Authorize(Roles = "Técnico")]
 
-<PageTitle>Historial | INTECH</PageTitle>
+@inject HistorialesService historialesService
+@inject Microsoft.AspNetCore.Identity.UserManager<INTECH.Data.ApplicationUser> userManager
+@inject ToastService toastService
 
-<div class="container-fluid p-0">
-    <div class="card">
-        <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-3">
-            <h1 class="h4 fw-normal mb-0">Historial</h1>
-            
+<PageTitle>Registro de Historial</PageTitle>
+<div class="container">
+    <div class="card shadow-lg">
+        <div class="card-header d-flex justify-content-between align-center mb-4">
+            <h5 class="card-title">Registro de Historial</h5>
         </div>
-        <div class="card-body py-5">
-            <p class="text-body-secondary mb-0">No hay actividades registradas.</p>
-        </div>
-        <div class="card-footer">Cantidad: 0</div>
     </div>
 </div>
