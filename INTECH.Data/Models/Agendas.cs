@@ -7,4 +7,6 @@ public class Agendas
 {
     [Key]
     public int AgendaId { get; set; }
+
+    public bool IsDeleted { get; set; }
 }
