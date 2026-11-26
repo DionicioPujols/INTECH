@@ -18,6 +18,7 @@
             </div>
 
             <div class="card-body">
+
                 @* Solicitud *@
                 <div class="mb-3">
                     <label class="form-label"><strong>Solicitud *</strong></label>
@@ -153,5 +154,16 @@
             navigationManager.NavigateTo("/Agenda/Index");
         });
         result.OnFailure(() => toastService.ShowError("No se pudo modificar la visita."));
+    }
+
+    private async Task Eliminar()
+    {
+        var result = await agendasService.Eliminar(AgendaId);
+        result.OnSuccess(() =>
+        {
+            toastService.ShowSuccess("Visita eliminada correctamente.");
+            navigationManager.NavigateTo("/Agenda/Index");
+        });
+        result.OnFailure(() => toastService.ShowError("No se pudo eliminar la visita."));
     }
 }
