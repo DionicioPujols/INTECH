@@ -57,4 +57,15 @@ public class AgendasService(
 
         return await contexto.SaveChangesAsync() > 0;
     }
+
+    public async Task<Result<Agendas?>> Buscar(int agendaId)
+    {
+        await using var contexto = await contextFactory.CreateDbContextAsync();
+        return await contexto.Agendas
+            .Include(a => a.Solicitud)
+                .ThenInclude(s => s.Cliente)
+            .Include(a => a.Solicitud)
+                .ThenInclude(s => s.EstadoSolicitud)
+            .FirstOrDefaultAsync(a => a.AgendaId == agendaId && !a.IsDeleted);
+    }
 }
