@@ -49,6 +49,12 @@ public class AgendasService(
             return false;
         }
 
-        return false;
+        agendaExistente.SolicitudId = agenda.SolicitudId;
+        agendaExistente.TecnicoId = agenda.TecnicoId;
+        agendaExistente.Fecha = agenda.Fecha;
+        agendaExistente.HoraInicio = agenda.HoraInicio;
+        agendaExistente.HoraFin = agenda.HoraFin;
+
+        return await contexto.SaveChangesAsync() > 0;
     }
 }
