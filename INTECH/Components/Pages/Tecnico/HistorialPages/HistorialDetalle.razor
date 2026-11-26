@@ -15,5 +15,41 @@
             </div>
             <a href="/Historial/Index" class="btn btn-outline-secondary btn-sm bi bi-x-lg"></a>
         </div>
+
+        <div class="card-body">
+            @* Información General *@
+            <div class="row g-3 mb-4">
+                <div class="col-12 col-md-6">
+                    <div class="p-3 bg-light border rounded h-100">
+                        <small class="text-body-secondary text-uppercase d-block">Cliente</small>
+                        <strong>@Historial.Solicitud?.Cliente?.Nombre</strong>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <div class="p-3 bg-light border rounded h-100">
+                        <small class="text-body-secondary text-uppercase d-block">Tipo de Servicio</small>
+                        <strong>@Historial.Solicitud?.TipoServicio</strong>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <div class="p-3 bg-light border rounded h-100">
+                        <small class="text-body-secondary text-uppercase d-block">Fecha Finalización</small>
+                        <strong>@Historial.FechaFinalizacion.ToString("dd/MM/yyyy")</strong>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <div class="p-3 bg-light border rounded h-100">
+                        <small class="text-body-secondary text-uppercase d-block">Técnico Asignado</small>
+                        <strong>@ObtenerNombreTecnico(Historial.TecnicoId)</strong>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="p-3 bg-light border rounded">
+                        <small class="text-body-secondary text-uppercase d-block">Dirección</small>
+                        <strong>@Historial.Solicitud?.Direccion</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
