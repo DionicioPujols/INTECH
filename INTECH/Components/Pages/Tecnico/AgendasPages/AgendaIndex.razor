@@ -267,4 +267,13 @@
 
     private readonly System.Globalization.CultureInfo Cultura = new("es-ES");
     private readonly string[] NombresDias = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+
+    public List<Agendas> ListaAgendas { get; set; } = new List<Agendas>();
+    public List<INTECH.Data.ApplicationUser> ListaTecnicos { get; set; } = new List<INTECH.Data.ApplicationUser>();
+    public Agendas? VisitaSeleccionada { get; set; }
+    public VistaAgenda VistaActual { get; set; } = VistaAgenda.Hoy;
+    public DateTime FechaReferencia { get; set; } = DateTime.Today;
+    public string SolicitudIdFiltro { get; set; } = string.Empty;
+    public string TecnicoFiltroId { get; set; } = string.Empty;
+    private int agendaIdAEliminar;
 }
