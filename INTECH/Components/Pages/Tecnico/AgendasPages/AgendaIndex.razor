@@ -108,6 +108,19 @@
                                         }
                                     </tr>
                                 </thead>
+                                <tbody>
+                                    @for (int hora = 8; hora <= 18; hora++)
+                                    {
+                                        var horaActual = hora;
+                                        <tr>
+                                            <td class="text-center text-muted small bg-light">@($"{horaActual:00}:00")</td>
+                                            @foreach (var dia in diasSemana)
+                                            {
+                                                <td class="p-1 fc-slot-cell"></td>
+                                            }
+                                        </tr>
+                                    }
+                                </tbody>
                             </table>
                         </div>
                     }
