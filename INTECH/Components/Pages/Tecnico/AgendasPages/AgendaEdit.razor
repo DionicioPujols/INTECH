@@ -83,3 +83,22 @@
         </div>
     </div>
 </EditForm>
+
+@* Modal de eliminación *@
+<div class="modal fade" id="modalEliminarAgenda" tabindex="-1" aria-labelledby="modalEliminarAgendaLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="modalEliminarAgendaLabel">Eliminar Visita</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        ¿Estás seguro de que deseas eliminar esta visita de la agenda?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal" @onclick="Eliminar">Sí, eliminar</button>
+      </div>
+    </div>
+  </div>
+</div>
