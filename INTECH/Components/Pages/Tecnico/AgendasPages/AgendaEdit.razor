@@ -102,3 +102,34 @@
     </div>
   </div>
 </div>
+
+@code {
+    [Parameter]
+    public int AgendaId { get; set; }
+
+    public Agendas Agenda { get; set; } = new Agendas();
+    public List<Solicitudes> ListaSolicitudes { get; set; } = new List<Solicitudes>();
+    public List<INTECH.Data.ApplicationUser> ListaTecnicos { get; set; } = new List<INTECH.Data.ApplicationUser>();
+    private string DireccionSeleccionada { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await agendasService.Buscar(AgendaId);
+        result.OnSuccess(agenda => Agenda = agenda ?? new Agendas());
+
+        var solicitudesResult = await solicitudesService.GetList(s => true);
+        solicitudesResult.OnSuccess(solicitudes => ListaSolicitudes = solicitudes);
+        solicitudesResult.OnFailure(() => toastService.ShowError("No se pudieron consultar las solicitudes."));
+
+        var tecnicos = await userManager.GetUsersInRoleAsync("Técnico");
+        ListaTecnicos = tecnicos.ToList();
+
+        CargarDireccion();
+    }
+
+    private void CargarDireccion()
+    {
+        var solicitud = ListaSolicitudes.FirstOrDefault(s => s.SolicitudId == Agenda.SolicitudId);
+        DireccionSeleccionada = solicitud?.Direccion ?? Agenda.Solicitud?.Direccion ?? string.Empty;
+    }
+}
