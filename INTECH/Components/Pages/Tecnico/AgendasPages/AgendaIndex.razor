@@ -151,12 +151,30 @@
                             {
                                 var esMesActual = fecha.Month == FechaReferencia.Month;
                                 var esHoy = fecha.Date == DateTime.Today;
+                                var visitasDia = ListaAgendas
+                                    .Where(a => a.Fecha.Date == fecha.Date)
+                                    .OrderBy(a => a.HoraInicio)
+                                    .ToList();
 
                                 <div class="fc-day-cell border-end border-bottom p-2 @(esMesActual ? "bg-white" : "bg-light text-muted")">
                                     <div class="d-flex justify-content-between align-items-center mb-1">
                                         <span class="badge rounded-pill @(esHoy ? "bg-primary" : "text-dark fw-normal")">
                                             @fecha.Day
                                         </span>
+                                        @if (visitasDia.Count > 3)
+                                        {
+                                            <small class="text-muted fc-more-label">+@((visitasDia.Count - 3)) más</small>
+                                        }
+                                    </div>
+
+                                    <div class="d-flex flex-column gap-1">
+                                        @foreach (var visita in visitasDia.Take(3))
+                                        {
+                                            <div class="badge bg-primary text-start text-truncate fw-normal py-1 px-2 fc-event-item"
+                                                 @onclick="() => SeleccionarVisita(visita)">
+                                                <span class="fw-bold">@visita.HoraInicio.ToString("HH:mm")</span> #@visita.SolicitudId @visita.Solicitud.Cliente.Nombre
+                                            </div>
+                                        }
                                     </div>
                                 </div>
                             }
