@@ -1,17 +1,16 @@
 @page "/OrdenTrabajo/Index"
 @attribute [Authorize(Roles = "Técnico")]
 
-<PageTitle>Órdenes de trabajo | INTECH</PageTitle>
+@inject OrdenesTrabajoService ordenesTrabajoService
+@inject SolicitudesService solicitudesService
+@inject EstadosSolicitudesService estadosSolicitudesService
+@inject ToastService toastService
 
-<div class="container-fluid p-0">
-    <div class="card">
-        <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-3">
-            <h1 class="h4 fw-normal mb-0">Órdenes de trabajo</h1>
-            
+<PageTitle>Registro de Órdenes de Trabajo</PageTitle>
+<div class="container">
+    <div class="card shadow-lg">
+        <div class="card-header d-flex justify-content-between align-center mb-4">
+            <h5 class="card-title">Registro de Órdenes de Trabajo</h5>
         </div>
-        <div class="card-body py-5">
-            <p class="text-body-secondary mb-0">No hay órdenes de trabajo registradas.</p>
-        </div>
-        <div class="card-footer">Cantidad: 0</div>
     </div>
 </div>
