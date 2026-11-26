@@ -43,8 +43,9 @@ public class OrdenesTrabajoService(
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
         var ordenExistente = await contexto.OrdenesTrabajo
-            .SingleOrDefaultAsync(o => o.OrdenTrabajoId == ordenTrabajo.OrdenTrabajoId);
-        if (ordenExistente == null)
+            .Include(o => o.Solicitud)
+            .SingleOrDefaultAsync(o => o.OrdenTrabajoId == ordenTrabajo.OrdenTrabajoId && !o.IsDeleted);
+        if (ordenExistente == null || ordenExistente.Solicitud.EstadoSolicitudId == 9)
         {
             return false;
         }
@@ -85,9 +86,18 @@ public class OrdenesTrabajoService(
     public async Task<Result> Eliminar(int ordenTrabajoId)
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
+        var orden = await contexto.OrdenesTrabajo
+            .Include(o => o.Solicitud)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(o => o.OrdenTrabajoId == ordenTrabajoId && !o.IsDeleted);
+        if (orden == null || orden.Solicitud.EstadoSolicitudId == 8 || orden.Solicitud.EstadoSolicitudId == 9)
+        {
+            return Result.Success(false);
+        }
+
         var eliminado = await contexto.OrdenesTrabajo
             .Where(o => o.OrdenTrabajoId == ordenTrabajoId && !o.IsDeleted)
-            .ExecuteUpdateAsync(o => o.SetProperty(orden => orden.IsDeleted, true)) > 0;
+            .ExecuteUpdateAsync(o => o.SetProperty(ordenItem => ordenItem.IsDeleted, true)) > 0;
         return Result.Success(eliminado);
     }
 }

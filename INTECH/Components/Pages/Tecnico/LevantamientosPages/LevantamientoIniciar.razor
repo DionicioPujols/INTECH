@@ -40,48 +40,48 @@
                 @* Disponibilidad de los espacios físicos *@
                 <div class="mb-3">
                     <label class="form-label"><strong>Disponibilidad de los espacios físicos *</strong></label>
-                    <InputText class="form-control" @bind-Value="Levantamiento.DisponibilidadEspaciosFisicos" placeholder="Ej.: Área de trabajo disponible en horario coordinado con el cliente"></InputText>
+                    <InputText class="form-control" @bind-Value="Levantamiento.DisponibilidadEspaciosFisicos" disabled="@SoloLectura" placeholder="Ej.: Área de trabajo disponible en horario coordinado con el cliente"></InputText>
                     <ValidationMessage For="(() => Levantamiento.DisponibilidadEspaciosFisicos)" />
                 </div>
 
                 @* Cargas eléctricas *@
                 <div class="mb-3">
                     <label class="form-label"><strong>Cargas eléctricas *</strong></label>
-                    <InputText class="form-control" @bind-Value="Levantamiento.CargasElectricas" placeholder="Ej.: Carga revisada para el servicio solicitado"></InputText>
+                    <InputText class="form-control" @bind-Value="Levantamiento.CargasElectricas" disabled="@SoloLectura" placeholder="Ej.: Carga revisada para el servicio solicitado"></InputText>
                     <ValidationMessage For="(() => Levantamiento.CargasElectricas)" />
                 </div>
 
                 @* Estabilidad de la tensión *@
                 <div class="mb-3">
                     <label class="form-label"><strong>Estabilidad de la tensión *</strong></label>
-                    <InputText class="form-control" @bind-Value="Levantamiento.EstabilidadTension" placeholder="Ej.: Tensión medida dentro del rango operativo durante la inspección"></InputText>
+                    <InputText class="form-control" @bind-Value="Levantamiento.EstabilidadTension" disabled="@SoloLectura" placeholder="Ej.: Tensión medida dentro del rango operativo durante la inspección"></InputText>
                     <ValidationMessage For="(() => Levantamiento.EstabilidadTension)" />
                 </div>
 
                 @* Recorrido físico de las tuberías *@
                 <div class="mb-3">
                     <label class="form-label"><strong>Recorrido físico de las tuberías *</strong></label>
-                    <InputText class="form-control" @bind-Value="Levantamiento.RecorridoTuberias" placeholder="Ej.: Recorrido principal verificado; requiere fijación y revisión"></InputText>
+                    <InputText class="form-control" @bind-Value="Levantamiento.RecorridoTuberias" disabled="@SoloLectura" placeholder="Ej.: Recorrido principal verificado; requiere fijación y revisión"></InputText>
                     <ValidationMessage For="(() => Levantamiento.RecorridoTuberias)" />
                 </div>
 
                 @* Recorrido físico del cableado *@
                 <div class="mb-3">
                     <label class="form-label"><strong>Recorrido físico del cableado *</strong></label>
-                    <InputText class="form-control" @bind-Value="Levantamiento.RecorridoCableado" placeholder="Ej.: Tendido y puntos de conexión identificados en el área"></InputText>
+                    <InputText class="form-control" @bind-Value="Levantamiento.RecorridoCableado" disabled="@SoloLectura" placeholder="Ej.: Tendido y puntos de conexión identificados en el área"></InputText>
                     <ValidationMessage For="(() => Levantamiento.RecorridoCableado)" />
                 </div>
 
                 @* Observaciones *@
                 <div class="mb-3">
                     <label class="form-label"><strong>Observaciones</strong></label>
-                    <InputTextArea class="form-control" @bind-Value="Levantamiento.Observaciones" placeholder="Ej.: Se recomienda coordinar el acceso y validar los materiales antes de iniciar."></InputTextArea>
+                    <InputTextArea class="form-control" @bind-Value="Levantamiento.Observaciones" disabled="@SoloLectura" placeholder="Ej.: Se recomienda coordinar el acceso y validar los materiales antes de iniciar."></InputTextArea>
                 </div>
 
                 @* Fotografías *@
                 <div class="mb-3">
                     <label class="form-label"><strong>Fotografías</strong></label>
-                    <InputFile class="form-control" OnChange="CargarFotos" multiple accept="image/*" />
+                    <InputFile class="form-control" OnChange="CargarFotos" multiple accept="image/*" disabled="@SoloLectura" />
                     <small class="text-body-secondary">Tamaño máximo por imagen: 5 MB.</small>
 
                     @if (Levantamiento.FotosLevantamientos.Any())
@@ -95,9 +95,12 @@
                                         <div class="card-body p-2">
                                             <small class="text-body-secondary d-block text-truncate">@foto.NombreArchivo</small>
                                         </div>
-                                        <div class="card-footer text-center p-2">
-                                            <button type="button" class="btn btn-outline-danger btn-sm bi bi-trash" @onclick="() => RemoverFoto(foto)"></button>
-                                        </div>
+                                        @if (!SoloLectura)
+                                        {
+                                            <div class="card-footer text-center p-2">
+                                                <button type="button" class="btn btn-outline-danger btn-sm bi bi-trash" @onclick="() => RemoverFoto(foto)"></button>
+                                            </div>
+                                        }
                                     </div>
                                 </div>
                             }
@@ -110,8 +113,11 @@
             @* Botones de Acción *@
             <div class="card-footer text-center mt-2">
                 <a href="/Levantamiento/Index" class="btn btn-secondary"> <span class="bi bi-x-lg"></span> Cancelar</a>
-                <button type="button" class="btn btn-outline-primary bi bi-floppy" @onclick="GuardarBorrador"> Guardar</button>
-                <button type="submit" class="btn btn-primary bi bi-send"> Enviar a Administración</button>
+                @if (!SoloLectura)
+                {
+                    <button type="button" class="btn btn-outline-primary bi bi-floppy" @onclick="GuardarBorrador"> Guardar</button>
+                    <button type="submit" class="btn btn-primary bi bi-send"> Enviar a Administración</button>
+                }
             </div>
         </div>
     </div>
@@ -123,6 +129,7 @@
 
     public Levantamientos Levantamiento { get; set; } = new Levantamientos();
     public List<INTECH.Data.ApplicationUser> ListaTecnicos { get; set; } = new List<INTECH.Data.ApplicationUser>();
+    private bool SoloLectura => Levantamiento.Solicitud != null && Levantamiento.Solicitud.EstadoSolicitudId != 1 && Levantamiento.Solicitud.EstadoSolicitudId != 2;
 
     protected override async Task OnInitializedAsync()
     {
@@ -209,6 +216,12 @@
             return;
         }
 
+        if (SoloLectura)
+        {
+            toastService.ShowError("No se puede modificar un levantamiento cuya solicitud no está pendiente o en proceso.");
+            return;
+        }
+
         LimpiarCampos();
         Levantamiento.EsBorrador = true;
 
@@ -227,6 +240,12 @@
         if (Levantamiento.LevantamientoId == 0)
         {
             toastService.ShowError("No se encontró el levantamiento.");
+            return;
+        }
+
+        if (SoloLectura)
+        {
+            toastService.ShowError("No se puede enviar un levantamiento cuya solicitud no está pendiente o en proceso.");
             return;
         }
 

@@ -136,15 +136,57 @@
 
     public async Task Modificar()
     {
+        if (string.IsNullOrWhiteSpace(Agenda.TecnicoId))
+        {
+            Agenda.TecnicoId = null;
+        }
+
+        if (Agenda.Fecha.DayOfWeek == DayOfWeek.Sunday)
+        {
+            toastService.ShowError("No se pueden programar visitas los domingos.");
+            return;
+        }
+
+        if (Agenda.HoraInicio < new TimeOnly(8, 0) || Agenda.HoraFin > new TimeOnly(18, 0))
+        {
+            toastService.ShowError("El horario permitido es de 08:00 AM a 06:00 PM.");
+            return;
+        }
+
         if (Agenda.HoraFin <= Agenda.HoraInicio)
         {
             toastService.ShowError("La hora de fin debe ser mayor que la hora de inicio.");
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(Agenda.TecnicoId))
+        var solicitud = ListaSolicitudes.FirstOrDefault(s => s.SolicitudId == Agenda.SolicitudId);
+        if ((solicitud?.EstadoSolicitudId ?? Agenda.Solicitud?.EstadoSolicitudId) == 9)
         {
-            Agenda.TecnicoId = null;
+            toastService.ShowError("No se puede modificar una visita de una solicitud finalizada.");
+            return;
+        }
+
+        var visitasMismaSolicitudResult = await agendasService.GetList(a => a.SolicitudId == Agenda.SolicitudId && a.AgendaId != Agenda.AgendaId);
+        var solicitudYaAgendada = false;
+        visitasMismaSolicitudResult.OnSuccess(visitas => solicitudYaAgendada = visitas.Any());
+        if (solicitudYaAgendada)
+        {
+            toastService.ShowError("La solicitud seleccionada ya tiene una visita asignada.");
+            return;
+        }
+
+        var visitasMismoDiaResult = await agendasService.GetList(a =>
+            a.AgendaId != Agenda.AgendaId &&
+            a.Fecha.Date == Agenda.Fecha.Date &&
+            a.TecnicoId == Agenda.TecnicoId &&
+            Agenda.HoraInicio < a.HoraFin &&
+            Agenda.HoraFin > a.HoraInicio);
+        var horarioOcupado = false;
+        visitasMismoDiaResult.OnSuccess(visitas => horarioOcupado = visitas.Any());
+        if (horarioOcupado)
+        {
+            toastService.ShowError("El técnico seleccionado ya tiene una visita programada en ese horario.");
+            return;
         }
 
         var result = await agendasService.Guardar(Agenda);
@@ -158,6 +200,14 @@
 
     private async Task Eliminar()
     {
+        var solicitud = ListaSolicitudes.FirstOrDefault(s => s.SolicitudId == Agenda.SolicitudId);
+        var estadoSolicitudId = solicitud?.EstadoSolicitudId ?? Agenda.Solicitud?.EstadoSolicitudId;
+        if (estadoSolicitudId == 2 || estadoSolicitudId == 3 || estadoSolicitudId == 9)
+        {
+            toastService.ShowError("No se puede eliminar una visita cuya solicitud está en proceso, en espera de administración o finalizada.");
+            return;
+        }
+
         var result = await agendasService.Eliminar(AgendaId);
         result.OnSuccess(() =>
         {

@@ -42,6 +42,14 @@ public class SolicitudesService(
     private async Task<bool> Modificar(Solicitudes solicitud)
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
+        var existente = await contexto.Solicitudes
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.SolicitudId == solicitud.SolicitudId && !s.IsDeleted);
+        if (existente == null || existente.EstadoSolicitudId == 9)
+        {
+            return false;
+        }
+
         contexto.Update(solicitud);
         return await contexto.SaveChangesAsync() > 0;
     }
@@ -69,6 +77,18 @@ public class SolicitudesService(
     public async Task<Result> Eliminar(int solicitudId)
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
+        var solicitud = await contexto.Solicitudes
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.SolicitudId == solicitudId && !s.IsDeleted);
+        if (solicitud == null || solicitud.EstadoSolicitudId == 2 || solicitud.EstadoSolicitudId == 3 || solicitud.EstadoSolicitudId == 9)
+        {
+            return Result.Success(false);
+        }
+
+        await contexto.Agendas
+            .Where(a => !a.IsDeleted && a.SolicitudId == solicitudId)
+            .ExecuteUpdateAsync(a => a.SetProperty(agenda => agenda.IsDeleted, true));
+
         var eliminado = await contexto.Solicitudes
             .Where(s => s.SolicitudId == solicitudId && !s.IsDeleted)
             .ExecuteUpdateAsync(s => s.SetProperty(solicitud => solicitud.IsDeleted, true)) > 0;

@@ -417,6 +417,13 @@
 
     private async Task Eliminar()
     {
+        var agenda = ListaAgendas.FirstOrDefault(a => a.AgendaId == agendaIdAEliminar);
+        if (agenda != null && (agenda.Solicitud.EstadoSolicitudId == 2 || agenda.Solicitud.EstadoSolicitudId == 3 || agenda.Solicitud.EstadoSolicitudId == 9))
+        {
+            toastService.ShowError("No se puede eliminar una visita cuya solicitud está en proceso, en espera de administración o finalizada.");
+            return;
+        }
+
         var result = await agendasService.Eliminar(agendaIdAEliminar);
         result.OnSuccess(() => toastService.ShowSuccess("Visita eliminada correctamente."));
         result.OnFailure(() => toastService.ShowError("No se pudo eliminar la visita."));

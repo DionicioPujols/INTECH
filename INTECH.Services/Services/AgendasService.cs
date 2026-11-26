@@ -32,9 +32,61 @@ public class AgendasService(
             .AnyAsync(a => a.AgendaId == agendaId);
     }
 
+    private async Task<bool> EsAgendaValida(Contexto contexto, Agendas agenda)
+    {
+        if (string.IsNullOrWhiteSpace(agenda.TecnicoId))
+        {
+            agenda.TecnicoId = null;
+        }
+
+        if (agenda.Fecha.DayOfWeek == DayOfWeek.Sunday)
+        {
+            return false;
+        }
+
+        if (agenda.HoraInicio < new TimeOnly(8, 0) || agenda.HoraFin > new TimeOnly(18, 0) || agenda.HoraFin <= agenda.HoraInicio)
+        {
+            return false;
+        }
+
+        var solicitud = await contexto.Solicitudes
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.SolicitudId == agenda.SolicitudId && !s.IsDeleted);
+        if (solicitud == null || solicitud.EstadoSolicitudId == 9)
+        {
+            return false;
+        }
+
+        var solicitudYaAgendada = await contexto.Agendas
+            .AnyAsync(a => !a.IsDeleted && a.SolicitudId == agenda.SolicitudId && a.AgendaId != agenda.AgendaId);
+        if (solicitudYaAgendada)
+        {
+            return false;
+        }
+
+        var horarioOcupado = await contexto.Agendas
+            .AnyAsync(a => !a.IsDeleted &&
+                           a.AgendaId != agenda.AgendaId &&
+                           a.Fecha.Date == agenda.Fecha.Date &&
+                           a.TecnicoId == agenda.TecnicoId &&
+                           agenda.HoraInicio < a.HoraFin &&
+                           agenda.HoraFin > a.HoraInicio);
+        if (horarioOcupado)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
     private async Task<bool> Insertar(Agendas agenda)
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
+        if (!await EsAgendaValida(contexto, agenda))
+        {
+            return false;
+        }
+
         contexto.Agendas.Add(agenda);
         return await contexto.SaveChangesAsync() > 0;
     }
@@ -43,8 +95,13 @@ public class AgendasService(
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
         var agendaExistente = await contexto.Agendas
-            .SingleOrDefaultAsync(a => a.AgendaId == agenda.AgendaId);
+            .SingleOrDefaultAsync(a => a.AgendaId == agenda.AgendaId && !a.IsDeleted);
         if (agendaExistente == null)
+        {
+            return false;
+        }
+
+        if (!await EsAgendaValida(contexto, agenda))
         {
             return false;
         }
@@ -86,9 +143,18 @@ public class AgendasService(
     public async Task<Result> Eliminar(int agendaId)
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
+        var agenda = await contexto.Agendas
+            .Include(a => a.Solicitud)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(a => a.AgendaId == agendaId && !a.IsDeleted);
+        if (agenda == null || agenda.Solicitud.EstadoSolicitudId == 2 || agenda.Solicitud.EstadoSolicitudId == 3 || agenda.Solicitud.EstadoSolicitudId == 9)
+        {
+            return Result.Success(false);
+        }
+
         var eliminado = await contexto.Agendas
             .Where(a => a.AgendaId == agendaId && !a.IsDeleted)
-            .ExecuteUpdateAsync(a => a.SetProperty(agenda => agenda.IsDeleted, true)) > 0;
+            .ExecuteUpdateAsync(a => a.SetProperty(agendaItem => agendaItem.IsDeleted, true)) > 0;
         return Result.Success(eliminado);
     }
 }

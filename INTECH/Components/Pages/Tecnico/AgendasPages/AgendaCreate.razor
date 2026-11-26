@@ -120,23 +120,77 @@
 
     public async Task Guardar()
     {
+        if (string.IsNullOrWhiteSpace(Agenda.TecnicoId))
+        {
+            Agenda.TecnicoId = null;
+        }
+
+        if (Agenda.Fecha.DayOfWeek == DayOfWeek.Sunday)
+        {
+            toastService.ShowError("No se pueden programar visitas los domingos.");
+            return;
+        }
+
+        if (Agenda.HoraInicio < new TimeOnly(8, 0) || Agenda.HoraFin > new TimeOnly(18, 0))
+        {
+            toastService.ShowError("El horario permitido es de 08:00 AM a 06:00 PM.");
+            return;
+        }
+
         if (Agenda.HoraFin <= Agenda.HoraInicio)
         {
             toastService.ShowError("La hora de fin debe ser mayor que la hora de inicio.");
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(Agenda.TecnicoId))
+        var solicitud = ListaSolicitudes.FirstOrDefault(s => s.SolicitudId == Agenda.SolicitudId);
+        if (solicitud != null && solicitud.EstadoSolicitudId == 9)
         {
-            Agenda.TecnicoId = null;
+            toastService.ShowError("No se puede programar una visita para una solicitud finalizada.");
+            return;
+        }
+
+        var visitasMismaSolicitudResult = await agendasService.GetList(a => a.SolicitudId == Agenda.SolicitudId && a.AgendaId != Agenda.AgendaId);
+        var solicitudYaAgendada = false;
+        visitasMismaSolicitudResult.OnSuccess(visitas => solicitudYaAgendada = visitas.Any());
+        if (solicitudYaAgendada)
+        {
+            toastService.ShowError("La solicitud seleccionada ya tiene una visita asignada.");
+            return;
+        }
+
+        var visitasMismoDiaResult = await agendasService.GetList(a =>
+            a.AgendaId != Agenda.AgendaId &&
+            a.Fecha.Date == Agenda.Fecha.Date &&
+            a.TecnicoId == Agenda.TecnicoId &&
+            Agenda.HoraInicio < a.HoraFin &&
+            Agenda.HoraFin > a.HoraInicio);
+        var horarioOcupado = false;
+        visitasMismoDiaResult.OnSuccess(visitas => horarioOcupado = visitas.Any());
+        if (horarioOcupado)
+        {
+            toastService.ShowError("El técnico seleccionado ya tiene una visita programada en ese horario.");
+            return;
         }
 
         var creadoResult = await agendasService.Guardar(Agenda);
-        creadoResult.OnSuccess(() =>
-        {
-            toastService.ShowSuccess("Visita guardada correctamente.");
-            navigationManager.NavigateTo("/Agenda/Index");
-        });
+        creadoResult.OnSuccess(() => toastService.ShowSuccess("Visita guardada correctamente."));
         creadoResult.OnFailure(() => toastService.ShowError("No se pudo guardar la visita."));
+        if (creadoResult.IsSuccess)
+        {
+            if (solicitud != null && solicitud.EstadoSolicitudId == 1)
+            {
+                Solicitudes? solicitudActualizar = null;
+                var buscarSolicitudResult = await solicitudesService.Buscar(solicitud.SolicitudId);
+                buscarSolicitudResult.OnSuccess(s => solicitudActualizar = s);
+                if (solicitudActualizar != null)
+                {
+                    solicitudActualizar.EstadoSolicitudId = 2;
+                    await solicitudesService.Guardar(solicitudActualizar);
+                }
+            }
+
+            navigationManager.NavigateTo("/Agenda/Index");
+        }
     }
 }

@@ -167,6 +167,26 @@
 
     private async Task Eliminar()
     {
+        var solicitud = ListaSolicitudes.FirstOrDefault(s => s.SolicitudId == solicitudIdAEliminar);
+        if (solicitud != null)
+        {
+            if (solicitud.EstadoSolicitudId == 2)
+            {
+                toastService.ShowError("No se puede eliminar una solicitud que está en proceso.");
+                return;
+            }
+            if (solicitud.EstadoSolicitudId == 3)
+            {
+                toastService.ShowError("No se puede eliminar una solicitud que está en espera de administración.");
+                return;
+            }
+            if (solicitud.EstadoSolicitudId == 9)
+            {
+                toastService.ShowError("No se puede eliminar una solicitud finalizada.");
+                return;
+            }
+        }
+
         var result = await solicitudesService.Eliminar(solicitudIdAEliminar);
         result.OnSuccess(() => toastService.ShowSuccess("Solicitud eliminada correctamente."));
         result.OnFailure(() => toastService.ShowError("No se pudo eliminar la solicitud."));
