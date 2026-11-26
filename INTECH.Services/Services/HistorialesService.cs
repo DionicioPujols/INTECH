@@ -8,7 +8,7 @@ namespace INTECH.Services;
 
 public class HistorialesService(
     IDbContextFactory<Contexto> contextFactory
-    )
+    ) : IServiceResult<Historiales, int>
 {
 
     public async Task<Result> Guardar(Historiales historial)
@@ -94,5 +94,14 @@ public class HistorialesService(
             .Where(criterio)
             .AsNoTracking()
             .ToListAsync();
+    }
+
+    public async Task<Result> Eliminar(int historialId)
+    {
+        await using var contexto = await contextFactory.CreateDbContextAsync();
+        var eliminado = await contexto.Historiales
+            .Where(h => h.HistorialId == historialId && !h.IsDeleted)
+            .ExecuteUpdateAsync(h => h.SetProperty(historial => historial.IsDeleted, true)) > 0;
+        return Result.Success(eliminado);
     }
 }
