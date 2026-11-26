@@ -89,6 +89,28 @@
                             </table>
                         </div>
                     }
+                    else if (VistaActual == VistaAgenda.Semanal)
+                    {
+                        var diasSemana = ObtenerDiasSemana();
+
+                        <div class="table-responsive">
+                            <table class="table table-bordered mb-0 align-middle">
+                                <thead class="table-light text-center">
+                                    <tr>
+                                        <th class="fc-col-hora">Hora</th>
+                                        @foreach (var dia in diasSemana)
+                                        {
+                                            var esHoy = dia.Date == DateTime.Today;
+                                            <th class="@(esHoy ? "table-primary" : "")">
+                                                <div class="small text-uppercase text-muted">@dia.ToString("ddd", Cultura)</div>
+                                                <div class="fs-6">@dia.Day</div>
+                                            </th>
+                                        }
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    }
                 </div>
             </div>
         </div>
