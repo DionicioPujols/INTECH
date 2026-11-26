@@ -18,6 +18,7 @@
             </div>
 
             <div class="card-body">
+
                 @* Solicitud *@
                 <div class="mb-3">
                     <label class="form-label"><strong>Solicitud *</strong></label>
@@ -115,5 +116,27 @@
     {
         var solicitud = ListaSolicitudes.FirstOrDefault(s => s.SolicitudId == Agenda.SolicitudId);
         DireccionSeleccionada = solicitud?.Direccion ?? string.Empty;
+    }
+
+    public async Task Guardar()
+    {
+        if (Agenda.HoraFin <= Agenda.HoraInicio)
+        {
+            toastService.ShowError("La hora de fin debe ser mayor que la hora de inicio.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(Agenda.TecnicoId))
+        {
+            Agenda.TecnicoId = null;
+        }
+
+        var creadoResult = await agendasService.Guardar(Agenda);
+        creadoResult.OnSuccess(() =>
+        {
+            toastService.ShowSuccess("Visita guardada correctamente.");
+            navigationManager.NavigateTo("/Agenda/Index");
+        });
+        creadoResult.OnFailure(() => toastService.ShowError("No se pudo guardar la visita."));
     }
 }
