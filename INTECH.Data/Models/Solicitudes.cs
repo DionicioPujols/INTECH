@@ -34,4 +34,7 @@ public class Solicitudes
     [ForeignKey("EstadoSolicitudId")]
     [InverseProperty("Solicitudes")]
     public virtual EstadosSolicitudes EstadoSolicitud { get; set; } = null!;
+
+    [InverseProperty("Solicitud")]
+    public virtual ICollection<Levantamientos> Levantamientos { get; set; } = new List<Levantamientos>();
 }

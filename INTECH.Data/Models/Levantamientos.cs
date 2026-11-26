@@ -37,4 +37,11 @@ public class Levantamientos
     public string Observaciones { get; set; } = string.Empty;
 
     public bool EsBorrador { get; set; }
+
+    [ForeignKey("SolicitudId")]
+    [InverseProperty("Levantamientos")]
+    public virtual Solicitudes Solicitud { get; set; } = null!;
+
+    [InverseProperty("Levantamiento")]
+    public virtual ICollection<FotosLevantamientos> FotosLevantamientos { get; set; } = new List<FotosLevantamientos>();
 }
