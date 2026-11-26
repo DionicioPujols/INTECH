@@ -20,4 +20,8 @@ public class OrdenesTrabajo
     public string Materiales { get; set; } = string.Empty;
 
     public string InstruccionesCampo { get; set; } = string.Empty;
+
+    [ForeignKey("SolicitudId")]
+    [InverseProperty("OrdenesTrabajo")]
+    public virtual Solicitudes Solicitud { get; set; } = null!;
 }
