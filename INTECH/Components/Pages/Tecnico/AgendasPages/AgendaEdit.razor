@@ -18,6 +18,18 @@
             </div>
 
             <div class="card-body">
+                @* Solicitud *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Solicitud *</strong></label>
+                    <InputSelect class="form-control form-select" @bind-Value="Agenda.SolicitudId" @bind-Value:after="CargarDireccion">
+                        <option value="0" disabled>Seleccionar solicitud...</option>
+                        @foreach (var solicitud in ListaSolicitudes)
+                        {
+                            <option value="@solicitud.SolicitudId">Solicitud #@solicitud.SolicitudId - @solicitud.Cliente.Nombre (@solicitud.TipoServicio)</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="(() => Agenda.SolicitudId)" />
+                </div>
             </div>
         </div>
     </div>
