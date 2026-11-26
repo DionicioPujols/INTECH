@@ -1,0 +1,116 @@
+@page "/Levantamiento/Iniciar/{LevantamientoId:int}"
+@attribute [Authorize(Roles = "Técnico")]
+
+@inject LevantamientosService levantamientosService
+@inject SolicitudesService solicitudesService
+@inject Microsoft.AspNetCore.Identity.UserManager<INTECH.Data.ApplicationUser> userManager
+@inject NavigationManager navigationManager
+@inject ToastService toastService
+
+<PageTitle>Iniciar Levantamiento</PageTitle>
+<EditForm Model="Levantamiento">
+    <DataAnnotationsValidator />
+
+    <div class="container">
+        <div class="card shadow-lg">
+            <div class="card-header text-center">
+                <h5 class="card-title">Iniciar Levantamiento</h5>
+            </div>
+
+            <div class="card-body">
+
+                @* Cliente *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Cliente</strong></label>
+                    <input class="form-control" value="@Levantamiento.Solicitud?.Cliente?.Nombre" disabled />
+                </div>
+
+                @* Tipo de Servicio *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Tipo de servicio</strong></label>
+                    <input class="form-control" value="@Levantamiento.Solicitud?.TipoServicio" disabled />
+                </div>
+
+                @* Técnico Asignado *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Técnico asignado</strong></label>
+                    <input class="form-control" value="@ObtenerNombreTecnico(Levantamiento.TecnicoId)" disabled />
+                </div>
+
+                @* Disponibilidad de los espacios físicos *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Disponibilidad de los espacios físicos *</strong></label>
+                    <InputText class="form-control" @bind-Value="Levantamiento.DisponibilidadEspaciosFisicos" placeholder="Ej.: Área de trabajo disponible en horario coordinado con el cliente"></InputText>
+                    <ValidationMessage For="(() => Levantamiento.DisponibilidadEspaciosFisicos)" />
+                </div>
+
+                @* Cargas eléctricas *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Cargas eléctricas *</strong></label>
+                    <InputText class="form-control" @bind-Value="Levantamiento.CargasElectricas" placeholder="Ej.: Carga revisada para el servicio solicitado"></InputText>
+                    <ValidationMessage For="(() => Levantamiento.CargasElectricas)" />
+                </div>
+
+                @* Estabilidad de la tensión *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Estabilidad de la tensión *</strong></label>
+                    <InputText class="form-control" @bind-Value="Levantamiento.EstabilidadTension" placeholder="Ej.: Tensión medida dentro del rango operativo durante la inspección"></InputText>
+                    <ValidationMessage For="(() => Levantamiento.EstabilidadTension)" />
+                </div>
+
+                @* Recorrido físico de las tuberías *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Recorrido físico de las tuberías *</strong></label>
+                    <InputText class="form-control" @bind-Value="Levantamiento.RecorridoTuberias" placeholder="Ej.: Recorrido principal verificado; requiere fijación y revisión"></InputText>
+                    <ValidationMessage For="(() => Levantamiento.RecorridoTuberias)" />
+                </div>
+
+                @* Recorrido físico del cableado *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Recorrido físico del cableado *</strong></label>
+                    <InputText class="form-control" @bind-Value="Levantamiento.RecorridoCableado" placeholder="Ej.: Tendido y puntos de conexión identificados en el área"></InputText>
+                    <ValidationMessage For="(() => Levantamiento.RecorridoCableado)" />
+                </div>
+
+                @* Observaciones *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Observaciones</strong></label>
+                    <InputTextArea class="form-control" @bind-Value="Levantamiento.Observaciones" placeholder="Ej.: Se recomienda coordinar el acceso y validar los materiales antes de iniciar."></InputTextArea>
+                </div>
+
+            </div>
+
+            @* Botones de Acción *@
+            <div class="card-footer text-center mt-2">
+                <a href="/Levantamiento/Index" class="btn btn-secondary"> <span class="bi bi-x-lg"></span> Cancelar</a>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int LevantamientoId { get; set; }
+
+    public Levantamientos Levantamiento { get; set; } = new Levantamientos();
+    public List<INTECH.Data.ApplicationUser> ListaTecnicos { get; set; } = new List<INTECH.Data.ApplicationUser>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await levantamientosService.Buscar(LevantamientoId);
+        result.OnSuccess(levantamiento => Levantamiento = levantamiento ?? new Levantamientos());
+
+        var tecnicos = await userManager.GetUsersInRoleAsync("Técnico");
+        ListaTecnicos = tecnicos.ToList();
+    }
+
+    private string ObtenerNombreTecnico(string? tecnicoId)
+    {
+        if (string.IsNullOrWhiteSpace(tecnicoId))
+        {
+            return "Sin asignar";
+        }
+
+        return ListaTecnicos.FirstOrDefault(t => t.Id == tecnicoId)?.UserName ?? "Sin asignar";
+    }
+}
