@@ -15,6 +15,80 @@
         </div>
 
         <div class="card-body">
+            @* Filtro *@
+            <div class="row">
+                <div class="col-3">
+                    <label class="col-form-label"><strong>Filtrar por</strong></label>
+                </div>
+                <div class="col-4">
+                    <label class="col-form-label"><strong>Búsqueda</strong></label>
+                </div>
+            </div>
+
+            @* Controles de búsqueda *@
+            <div class="row align-items-center">
+                <div class="col-3">
+                    <InputSelect class="form-select" @bind-Value="Filtro">
+                        <option value="" selected disabled>Elija una opci&oacute;n</option>
+                        <option value="LevantamientoId">LevantamientoId</option>
+                        <option value="SolicitudId">SolicitudId</option>
+                        <option value="Cliente">Cliente</option>
+                        <option value="TipoServicio">Tipo de Servicio</option>
+                        <option value="Fecha">Fecha Programada</option>
+                        <option value="Estado">Estado</option>
+                        <option value="Tecnico">Técnico</option>
+                    </InputSelect>
+                </div>
+                <div class="col-4">
+                    <div class="input-group">
+                        <input class="form-control" @bind="ValorFiltro" placeholder="Buscar" />
+                        <button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"></button>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-2">
+                    <label class="col-form-label"><strong>Desde</strong></label>
+                    <InputDate class="form-control" @bind-Value="Desde"></InputDate>
+                </div>
+                <div class="col-2">
+                    <label class="col-form-label"><strong>Hasta</strong></label>
+                    <InputDate class="form-control" @bind-Value="Hasta"></InputDate>
+                </div>
+                <div class="col-3">
+                    <label class="col-form-label"><strong>Tipo de servicio</strong></label>
+                    <InputSelect class="form-select" @bind-Value="TipoServicioFiltro">
+                        <option value="">Todos</option>
+                        <option value="Cableado Estructurado">Cableado Estructurado</option>
+                        <option value="Instalación de Paneles Solares">Instalación de Paneles Solares</option>
+                        <option value="Instalación de Planta Eléctrica">Instalación de Planta Eléctrica</option>
+                        <option value="Instalación de Sistema UPS">Instalación de Sistema UPS</option>
+                        <option value="Mantenimiento Eléctrico">Mantenimiento Eléctrico</option>
+                    </InputSelect>
+                </div>
+                <div class="col-3">
+                    <label class="col-form-label"><strong>Estado</strong></label>
+                    <InputSelect class="form-select" @bind-Value="EstadoFiltroId">
+                        <option value="0">Todos</option>
+                        @foreach (var estadoSolicitud in ListaEstadosSolicitudes)
+                        {
+                            <option value="@estadoSolicitud.EstadoSolicitudId">@estadoSolicitud.Nombre</option>
+                        }
+                    </InputSelect>
+                </div>
+                <div class="col-2">
+                    <label class="col-form-label"><strong>Técnico</strong></label>
+                    <InputSelect class="form-select" @bind-Value="TecnicoFiltroId">
+                        <option value="">Todos</option>
+                        <option value="SIN_ASIGNAR">Sin asignar</option>
+                        @foreach (var tecnico in ListaTecnicos)
+                        {
+                            <option value="@tecnico.Id">@tecnico.UserName</option>
+                        }
+                    </InputSelect>
+                </div>
+            </div>
+
             @* Tabla *@
             <div class="grid">
                 <QuickGrid Items="ListaLevantamientos.AsQueryable()" Class="table table-hover mt-3">
@@ -81,6 +155,13 @@
     public List<Levantamientos> ListaLevantamientos { get; set; } = new List<Levantamientos>();
     public List<EstadosSolicitudes> ListaEstadosSolicitudes { get; set; } = new List<EstadosSolicitudes>();
     public List<INTECH.Data.ApplicationUser> ListaTecnicos { get; set; } = new List<INTECH.Data.ApplicationUser>();
+    public string Filtro { get; set; } = string.Empty;
+    public string ValorFiltro { get; set; } = string.Empty;
+    public DateTime? Desde { get; set; }
+    public DateTime? Hasta { get; set; }
+    public string TipoServicioFiltro { get; set; } = string.Empty;
+    public int EstadoFiltroId { get; set; }
+    public string TecnicoFiltroId { get; set; } = string.Empty;
     private int levantamientoIdAEliminar;
 
     protected override async Task OnInitializedAsync()
@@ -93,6 +174,8 @@
         ListaTecnicos = tecnicos.ToList();
 
         await CargarLevantamientos();
+        Desde = null;
+        Hasta = null;
     }
 
     private async Task CargarLevantamientos()
@@ -147,6 +230,127 @@
         if (result.IsSuccess)
         {
             await CargarLevantamientos();
+        }
+    }
+
+    private async Task Buscar()
+    {
+        var valor = ValorFiltro.Trim().ToLower();
+        if (Filtro == "Fecha")
+        {
+            if (Desde == null || Hasta == null)
+            {
+                toastService.ShowError("Seleccione las fechas desde y hasta.");
+                return;
+            }
+
+            if (Desde > Hasta)
+            {
+                toastService.ShowWarning("La fecha desde no puede ser mayor que la fecha hasta.");
+                return;
+            }
+
+            var levantamientosPorFechaResult = await levantamientosService.GetList(l =>
+                l.FechaProgramada >= Desde && l.FechaProgramada <= Hasta);
+            levantamientosPorFechaResult.OnSuccess(levantamientos => ListaLevantamientos = levantamientos);
+            levantamientosPorFechaResult.OnFailure(() =>
+                toastService.ShowError("No se pudieron consultar los levantamientos."));
+        }
+        else if (Filtro == "Estado")
+        {
+            if (EstadoFiltroId == 0)
+            {
+                await CargarLevantamientos();
+                return;
+            }
+
+            var levantamientosPorEstadoResult = await levantamientosService.GetList(l => l.Solicitud.EstadoSolicitudId == EstadoFiltroId);
+            levantamientosPorEstadoResult.OnSuccess(levantamientos => ListaLevantamientos = levantamientos);
+            levantamientosPorEstadoResult.OnFailure(() =>
+                toastService.ShowError("No se pudieron consultar los levantamientos."));
+        }
+        else if (Filtro == "TipoServicio")
+        {
+            if (TipoServicioFiltro != "")
+            {
+                var levantamientosPorTipoResult = await levantamientosService.GetList(l => l.Solicitud.TipoServicio == TipoServicioFiltro);
+                levantamientosPorTipoResult.OnSuccess(levantamientos => ListaLevantamientos = levantamientos);
+                levantamientosPorTipoResult.OnFailure(() =>
+                    toastService.ShowError("No se pudieron consultar los levantamientos."));
+            }
+            else if (valor != "")
+            {
+                var levantamientosPorTipoResult = await levantamientosService.GetList(l => l.Solicitud.TipoServicio.ToLower().Contains(valor));
+                levantamientosPorTipoResult.OnSuccess(levantamientos => ListaLevantamientos = levantamientos);
+                levantamientosPorTipoResult.OnFailure(() =>
+                    toastService.ShowError("No se pudieron consultar los levantamientos."));
+            }
+            else
+            {
+                await CargarLevantamientos();
+            }
+        }
+        else if (Filtro == "Tecnico")
+        {
+            if (TecnicoFiltroId == "")
+            {
+                await CargarLevantamientos();
+                return;
+            }
+            else if (TecnicoFiltroId == "SIN_ASIGNAR")
+            {
+                var levantamientosSinTecnicoResult = await levantamientosService.GetList(l => string.IsNullOrEmpty(l.TecnicoId));
+                levantamientosSinTecnicoResult.OnSuccess(levantamientos => ListaLevantamientos = levantamientos);
+                levantamientosSinTecnicoResult.OnFailure(() =>
+                    toastService.ShowError("No se pudieron consultar los levantamientos."));
+                return;
+            }
+
+            var levantamientosPorTecnicoResult = await levantamientosService.GetList(l => l.TecnicoId == TecnicoFiltroId);
+            levantamientosPorTecnicoResult.OnSuccess(levantamientos => ListaLevantamientos = levantamientos);
+            levantamientosPorTecnicoResult.OnFailure(() =>
+                toastService.ShowError("No se pudieron consultar los levantamientos."));
+        }
+        else if (valor == "")
+        {
+            await CargarLevantamientos();
+        }
+        else if (Filtro == "LevantamientoId")
+        {
+            if (!int.TryParse(valor, out var levantamientoId))
+            {
+                toastService.ShowError("Ingrese un número de levantamiento válido.");
+                return;
+            }
+
+            var levantamientosPorIdResult = await levantamientosService.GetList(l => l.LevantamientoId == levantamientoId);
+            levantamientosPorIdResult.OnSuccess(levantamientos => ListaLevantamientos = levantamientos);
+            levantamientosPorIdResult.OnFailure(() =>
+                toastService.ShowError("No se pudieron consultar los levantamientos."));
+        }
+        else if (Filtro == "SolicitudId")
+        {
+            if (!int.TryParse(valor, out var solicitudId))
+            {
+                toastService.ShowError("Ingrese un número de solicitud válido.");
+                return;
+            }
+
+            var levantamientosPorSolicitudResult = await levantamientosService.GetList(l => l.SolicitudId == solicitudId);
+            levantamientosPorSolicitudResult.OnSuccess(levantamientos => ListaLevantamientos = levantamientos);
+            levantamientosPorSolicitudResult.OnFailure(() =>
+                toastService.ShowError("No se pudieron consultar los levantamientos."));
+        }
+        else if (Filtro == "Cliente")
+        {
+            var levantamientosPorClienteResult = await levantamientosService.GetList(l => l.Solicitud.Cliente.Nombre.ToLower().Contains(valor));
+            levantamientosPorClienteResult.OnSuccess(levantamientos => ListaLevantamientos = levantamientos);
+            levantamientosPorClienteResult.OnFailure(() =>
+                toastService.ShowError("No se pudieron consultar los levantamientos."));
+        }
+        else
+        {
+            toastService.ShowError("Seleccione un filtro.");
         }
     }
 }
