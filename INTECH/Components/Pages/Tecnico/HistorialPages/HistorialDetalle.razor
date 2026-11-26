@@ -1,0 +1,19 @@
+@page "/Historial/Detalle/{HistorialId:int}"
+@attribute [Authorize(Roles = "Técnico")]
+
+@inject HistorialesService historialesService
+@inject Microsoft.AspNetCore.Identity.UserManager<INTECH.Data.ApplicationUser> userManager
+@inject ToastService toastService
+
+<PageTitle>Detalle de Historial</PageTitle>
+<div class="container">
+    <div class="card shadow-lg">
+        <div class="card-header d-flex justify-content-between align-center mb-3">
+            <div>
+                <h5 class="card-title mb-0">Detalle de Historial</h5>
+                <small class="text-body-secondary">Historial #@Historial.HistorialId · Solicitud #@Historial.SolicitudId</small>
+            </div>
+            <a href="/Historial/Index" class="btn btn-outline-secondary btn-sm bi bi-x-lg"></a>
+        </div>
+    </div>
+</div>
