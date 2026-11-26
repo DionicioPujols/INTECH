@@ -104,3 +104,67 @@
         </div>
     </div>
 </div>
+
+@code {
+    public List<Historiales> ListaHistoriales { get; set; } = new List<Historiales>();
+    public List<INTECH.Data.ApplicationUser> ListaTecnicos { get; set; } = new List<INTECH.Data.ApplicationUser>();
+    public string Filtro { get; set; } = string.Empty;
+    public string ValorFiltro { get; set; } = string.Empty;
+    public DateTime? Desde { get; set; }
+    public DateTime? Hasta { get; set; }
+    public string TipoServicioFiltro { get; set; } = string.Empty;
+    public string TecnicoFiltroId { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var tecnicos = await userManager.GetUsersInRoleAsync("Técnico");
+        ListaTecnicos = tecnicos.ToList();
+
+        await CargarHistoriales();
+        Desde = null;
+        Hasta = null;
+    }
+
+    private async Task CargarHistoriales()
+    {
+        var historialesResult = await historialesService.GetList(h => true);
+        historialesResult.OnSuccess(historiales => ListaHistoriales = historiales);
+        historialesResult.OnFailure(() => toastService.ShowError("No se pudieron consultar los historiales."));
+    }
+
+    private string ObtenerNombreTecnico(string? tecnicoId)
+    {
+        if (string.IsNullOrWhiteSpace(tecnicoId))
+        {
+            return "Sin asignar";
+        }
+
+        return ListaTecnicos.FirstOrDefault(t => t.Id == tecnicoId)?.UserName ?? "Sin asignar";
+    }
+
+    private string ObtenerColorEstado(int estadoSolicitudId)
+    {
+        if (estadoSolicitudId == 1)
+        {
+            return "bg-warning-subtle text-warning-emphasis";
+        }
+        else if (estadoSolicitudId == 2)
+        {
+            return "bg-primary-subtle text-primary-emphasis";
+        }
+        else if (estadoSolicitudId == 3)
+        {
+            return "bg-primary bg-opacity-10 text-primary";
+        }
+        else if (estadoSolicitudId == 5)
+        {
+            return "bg-warning-subtle text-danger-emphasis";
+        }
+        else if (estadoSolicitudId == 9)
+        {
+            return "bg-success-subtle text-success-emphasis";
+        }
+
+        return "bg-danger-subtle text-danger-emphasis";
+    }
+}
