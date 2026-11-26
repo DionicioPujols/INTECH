@@ -1,0 +1,256 @@
+@page "/Levantamiento/Iniciar/{LevantamientoId:int}"
+@attribute [Authorize(Roles = "Técnico")]
+
+@inject LevantamientosService levantamientosService
+@inject SolicitudesService solicitudesService
+@inject Microsoft.AspNetCore.Identity.UserManager<INTECH.Data.ApplicationUser> userManager
+@inject NavigationManager navigationManager
+@inject ToastService toastService
+
+<PageTitle>Iniciar Levantamiento</PageTitle>
+<EditForm Model="Levantamiento" OnValidSubmit="EnviarAdministracion">
+    <DataAnnotationsValidator />
+
+    <div class="container">
+        <div class="card shadow-lg">
+            <div class="card-header text-center">
+                <h5 class="card-title">Iniciar Levantamiento</h5>
+            </div>
+
+            <div class="card-body">
+
+                @* Cliente *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Cliente</strong></label>
+                    <input class="form-control" value="@Levantamiento.Solicitud?.Cliente?.Nombre" disabled />
+                </div>
+
+                @* Tipo de Servicio *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Tipo de servicio</strong></label>
+                    <input class="form-control" value="@Levantamiento.Solicitud?.TipoServicio" disabled />
+                </div>
+
+                @* Técnico Asignado *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Técnico asignado</strong></label>
+                    <input class="form-control" value="@ObtenerNombreTecnico(Levantamiento.TecnicoId)" disabled />
+                </div>
+
+                @* Disponibilidad de los espacios físicos *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Disponibilidad de los espacios físicos *</strong></label>
+                    <InputText class="form-control" @bind-Value="Levantamiento.DisponibilidadEspaciosFisicos" placeholder="Ej.: Área de trabajo disponible en horario coordinado con el cliente"></InputText>
+                    <ValidationMessage For="(() => Levantamiento.DisponibilidadEspaciosFisicos)" />
+                </div>
+
+                @* Cargas eléctricas *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Cargas eléctricas *</strong></label>
+                    <InputText class="form-control" @bind-Value="Levantamiento.CargasElectricas" placeholder="Ej.: Carga revisada para el servicio solicitado"></InputText>
+                    <ValidationMessage For="(() => Levantamiento.CargasElectricas)" />
+                </div>
+
+                @* Estabilidad de la tensión *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Estabilidad de la tensión *</strong></label>
+                    <InputText class="form-control" @bind-Value="Levantamiento.EstabilidadTension" placeholder="Ej.: Tensión medida dentro del rango operativo durante la inspección"></InputText>
+                    <ValidationMessage For="(() => Levantamiento.EstabilidadTension)" />
+                </div>
+
+                @* Recorrido físico de las tuberías *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Recorrido físico de las tuberías *</strong></label>
+                    <InputText class="form-control" @bind-Value="Levantamiento.RecorridoTuberias" placeholder="Ej.: Recorrido principal verificado; requiere fijación y revisión"></InputText>
+                    <ValidationMessage For="(() => Levantamiento.RecorridoTuberias)" />
+                </div>
+
+                @* Recorrido físico del cableado *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Recorrido físico del cableado *</strong></label>
+                    <InputText class="form-control" @bind-Value="Levantamiento.RecorridoCableado" placeholder="Ej.: Tendido y puntos de conexión identificados en el área"></InputText>
+                    <ValidationMessage For="(() => Levantamiento.RecorridoCableado)" />
+                </div>
+
+                @* Observaciones *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Observaciones</strong></label>
+                    <InputTextArea class="form-control" @bind-Value="Levantamiento.Observaciones" placeholder="Ej.: Se recomienda coordinar el acceso y validar los materiales antes de iniciar."></InputTextArea>
+                </div>
+
+                @* Fotografías *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Fotografías</strong></label>
+                    <InputFile class="form-control" OnChange="CargarFotos" multiple accept="image/*" />
+                    <small class="text-body-secondary">Tamaño máximo por imagen: 5 MB.</small>
+
+                    @if (Levantamiento.FotosLevantamientos.Any())
+                    {
+                        <div class="row g-3 mt-2">
+                            @foreach (var foto in Levantamiento.FotosLevantamientos)
+                            {
+                                <div class="col-6 col-md-3">
+                                    <div class="card h-100">
+                                        <img src="@($"data:{foto.TipoContenido};base64,{Convert.ToBase64String(foto.Contenido)}")" class="card-img-top" alt="@foto.NombreArchivo" />
+                                        <div class="card-body p-2">
+                                            <small class="text-body-secondary d-block text-truncate">@foto.NombreArchivo</small>
+                                        </div>
+                                        <div class="card-footer text-center p-2">
+                                            <button type="button" class="btn btn-outline-danger btn-sm bi bi-trash" @onclick="() => RemoverFoto(foto)"></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+            </div>
+
+            @* Botones de Acción *@
+            <div class="card-footer text-center mt-2">
+                <a href="/Levantamiento/Index" class="btn btn-secondary"> <span class="bi bi-x-lg"></span> Cancelar</a>
+                <button type="button" class="btn btn-outline-primary bi bi-floppy" @onclick="GuardarBorrador"> Guardar</button>
+                <button type="submit" class="btn btn-primary bi bi-send"> Enviar a Administración</button>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int LevantamientoId { get; set; }
+
+    public Levantamientos Levantamiento { get; set; } = new Levantamientos();
+    public List<INTECH.Data.ApplicationUser> ListaTecnicos { get; set; } = new List<INTECH.Data.ApplicationUser>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await levantamientosService.Buscar(LevantamientoId);
+        result.OnSuccess(levantamiento => Levantamiento = levantamiento ?? new Levantamientos());
+
+        var tecnicos = await userManager.GetUsersInRoleAsync("Técnico");
+        ListaTecnicos = tecnicos.ToList();
+    }
+
+    private string ObtenerNombreTecnico(string? tecnicoId)
+    {
+        if (string.IsNullOrWhiteSpace(tecnicoId))
+        {
+            return "Sin asignar";
+        }
+
+        return ListaTecnicos.FirstOrDefault(t => t.Id == tecnicoId)?.UserName ?? "Sin asignar";
+    }
+
+    private async Task CargarFotos(InputFileChangeEventArgs e)
+    {
+        var tamanoMaximo = 5 * 1024 * 1024;
+        foreach (var archivo in e.GetMultipleFiles(10))
+        {
+            if (!archivo.ContentType.StartsWith("image/"))
+            {
+                toastService.ShowError("Solo se permiten archivos de imagen.");
+                continue;
+            }
+
+            if (archivo.Size > tamanoMaximo)
+            {
+                toastService.ShowError($"La imagen {archivo.Name} supera el tamaño máximo de 5 MB.");
+                continue;
+            }
+
+            using var stream = archivo.OpenReadStream(tamanoMaximo);
+            using var memoryStream = new MemoryStream();
+            await stream.CopyToAsync(memoryStream);
+
+            Levantamiento.FotosLevantamientos.Add(new FotosLevantamientos
+            {
+                LevantamientoId = Levantamiento.LevantamientoId,
+                NombreArchivo = archivo.Name,
+                TipoContenido = archivo.ContentType,
+                Contenido = memoryStream.ToArray()
+            });
+        }
+    }
+
+    private void RemoverFoto(FotosLevantamientos foto)
+    {
+        Levantamiento.FotosLevantamientos.Remove(foto);
+    }
+
+    private void LimpiarCampos()
+    {
+        Levantamiento.DisponibilidadEspaciosFisicos = Levantamiento.DisponibilidadEspaciosFisicos.Trim();
+        Levantamiento.CargasElectricas = Levantamiento.CargasElectricas.Trim();
+        Levantamiento.EstabilidadTension = Levantamiento.EstabilidadTension.Trim();
+        Levantamiento.RecorridoTuberias = Levantamiento.RecorridoTuberias.Trim();
+        Levantamiento.RecorridoCableado = Levantamiento.RecorridoCableado.Trim();
+        Levantamiento.Observaciones = Levantamiento.Observaciones.Trim();
+    }
+
+    private async Task ActualizarEstadoSolicitud(int estadoSolicitudId)
+    {
+        Solicitudes? solicitud = null;
+        var solicitudResult = await solicitudesService.Buscar(Levantamiento.SolicitudId);
+        solicitudResult.OnSuccess(s => solicitud = s);
+        if (solicitud != null)
+        {
+            solicitud.EstadoSolicitudId = estadoSolicitudId;
+            await solicitudesService.Guardar(solicitud);
+        }
+    }
+
+    public async Task GuardarBorrador()
+    {
+        if (Levantamiento.LevantamientoId == 0)
+        {
+            toastService.ShowError("No se encontró el levantamiento.");
+            return;
+        }
+
+        LimpiarCampos();
+        Levantamiento.EsBorrador = true;
+
+        var result = await levantamientosService.Guardar(Levantamiento);
+        result.OnSuccess(() => toastService.ShowSuccess("Borrador del levantamiento guardado correctamente."));
+        result.OnFailure(() => toastService.ShowError("No se pudo guardar el borrador del levantamiento."));
+        if (result.IsSuccess)
+        {
+            await ActualizarEstadoSolicitud(2);
+            navigationManager.NavigateTo("/Levantamiento/Index");
+        }
+    }
+
+    public async Task EnviarAdministracion()
+    {
+        if (Levantamiento.LevantamientoId == 0)
+        {
+            toastService.ShowError("No se encontró el levantamiento.");
+            return;
+        }
+
+        LimpiarCampos();
+
+        if (Levantamiento.DisponibilidadEspaciosFisicos == "" ||
+            Levantamiento.CargasElectricas == "" ||
+            Levantamiento.EstabilidadTension == "" ||
+            Levantamiento.RecorridoTuberias == "" ||
+            Levantamiento.RecorridoCableado == "")
+        {
+            toastService.ShowError("Complete todos los campos obligatorios del levantamiento.");
+            return;
+        }
+
+        Levantamiento.EsBorrador = false;
+
+        var result = await levantamientosService.Guardar(Levantamiento);
+        result.OnSuccess(() => toastService.ShowSuccess("Levantamiento enviado a administración correctamente."));
+        result.OnFailure(() => toastService.ShowError("No se pudo enviar el levantamiento a administración."));
+        if (result.IsSuccess)
+        {
+            await ActualizarEstadoSolicitud(3);
+            navigationManager.NavigateTo("/Levantamiento/Index");
+        }
+    }
+}

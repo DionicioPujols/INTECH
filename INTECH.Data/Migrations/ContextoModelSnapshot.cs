@@ -16,7 +16,7 @@ partial class ContextoModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261124072507_AgregarEstadosSolicitudes";
+    public override string LastMigrationId => "20261126025401_AgregarLevantamientosYFotos";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -133,6 +133,96 @@ partial class ContextoModelSnapshot : ModelSnapshot
                     });
             });
 
+        modelBuilder.Entity("INTECH.Models.FotosLevantamientos", b =>
+            {
+                var fotoLevantamientoId = b.Property<int>("FotoLevantamientoId")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
+
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(fotoLevantamientoId);
+
+                b.Property<byte[]>("Contenido")
+                    .IsRequired()
+                    .HasColumnType("varbinary(max)");
+
+                b.Property<int>("LevantamientoId")
+                    .HasColumnType("int");
+
+                b.Property<string>("NombreArchivo")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
+
+                b.Property<string>("TipoContenido")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
+
+                b.HasKey("FotoLevantamientoId");
+
+                b.HasIndex("LevantamientoId");
+
+                b.ToTable("FotosLevantamientos");
+            });
+
+        modelBuilder.Entity("INTECH.Models.Levantamientos", b =>
+            {
+                var levantamientoId = b.Property<int>("LevantamientoId")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
+
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(levantamientoId);
+
+                b.Property<string>("CargasElectricas")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
+
+                b.Property<string>("DisponibilidadEspaciosFisicos")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
+
+                b.Property<bool>("EsBorrador")
+                    .HasColumnType("bit");
+
+                b.Property<string>("EstabilidadTension")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
+
+                b.Property<DateTime>("FechaProgramada")
+                    .HasColumnType("datetime2");
+
+                b.Property<TimeOnly>("HoraFin")
+                    .HasColumnType("time");
+
+                b.Property<TimeOnly>("HoraInicio")
+                    .HasColumnType("time");
+
+                b.Property<bool>("IsDeleted")
+                    .HasColumnType("bit");
+
+                b.Property<string>("Observaciones")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
+
+                b.Property<string>("RecorridoCableado")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
+
+                b.Property<string>("RecorridoTuberias")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
+
+                b.Property<int>("SolicitudId")
+                    .HasColumnType("int");
+
+                b.Property<string>("TecnicoId")
+                    .HasColumnType("nvarchar(max)");
+
+                b.HasKey("LevantamientoId");
+
+                b.HasIndex("SolicitudId");
+
+                b.ToTable("Levantamientos");
+            });
+
         modelBuilder.Entity("INTECH.Models.Solicitudes", b =>
             {
                 var solicitudId = b.Property<int>("SolicitudId")
@@ -201,6 +291,28 @@ partial class ContextoModelSnapshot : ModelSnapshot
                 b.ToTable("TelefonosClientes");
             });
 
+        modelBuilder.Entity("INTECH.Models.FotosLevantamientos", b =>
+            {
+                b.HasOne("INTECH.Models.Levantamientos", "Levantamiento")
+                    .WithMany("FotosLevantamientos")
+                    .HasForeignKey("LevantamientoId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("Levantamiento");
+            });
+
+        modelBuilder.Entity("INTECH.Models.Levantamientos", b =>
+            {
+                b.HasOne("INTECH.Models.Solicitudes", "Solicitud")
+                    .WithMany("Levantamientos")
+                    .HasForeignKey("SolicitudId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("Solicitud");
+            });
+
         modelBuilder.Entity("INTECH.Models.Solicitudes", b =>
             {
                 b.HasOne("INTECH.Models.Clientes", "Cliente")
@@ -241,6 +353,16 @@ partial class ContextoModelSnapshot : ModelSnapshot
         modelBuilder.Entity("INTECH.Models.EstadosSolicitudes", b =>
             {
                 b.Navigation("Solicitudes");
+            });
+
+        modelBuilder.Entity("INTECH.Models.Levantamientos", b =>
+            {
+                b.Navigation("FotosLevantamientos");
+            });
+
+        modelBuilder.Entity("INTECH.Models.Solicitudes", b =>
+            {
+                b.Navigation("Levantamientos");
             });
 #pragma warning restore 612, 618
     }
