@@ -99,4 +99,14 @@
         var tecnicos = await userManager.GetUsersInRoleAsync("Técnico");
         ListaTecnicos = tecnicos.ToList();
     }
+
+    private string ObtenerNombreTecnico(string? tecnicoId)
+    {
+        if (string.IsNullOrWhiteSpace(tecnicoId))
+        {
+            return "Sin asignar";
+        }
+
+        return ListaTecnicos.FirstOrDefault(t => t.Id == tecnicoId)?.UserName ?? "Sin asignar";
+    }
 }
