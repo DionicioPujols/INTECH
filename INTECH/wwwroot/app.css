@@ -186,6 +186,11 @@ html, body {
     grid-template-columns: repeat(7, minmax(0, 1fr));
 }
 
+.tecnico-layout .fc-day-cell {
+    min-height: 115px;
+    transition: background-color 0.15s ease;
+}
+
 @media (min-width: 768px) {
     .tecnico-sidebar {
         width: 250px;
