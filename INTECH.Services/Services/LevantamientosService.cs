@@ -8,7 +8,7 @@ namespace INTECH.Services;
 
 public class LevantamientosService(
     IDbContextFactory<Contexto> contextFactory
-    )
+    ) : IServiceResult<Levantamientos, int>
 {
 
     public async Task<Result> Guardar(Levantamientos levantamiento)
@@ -76,5 +76,41 @@ public class LevantamientosService(
         }
 
         return await contexto.SaveChangesAsync() > 0;
+    }
+
+    public async Task<Result<Levantamientos?>> Buscar(int levantamientoId)
+    {
+        await using var contexto = await contextFactory.CreateDbContextAsync();
+        return await contexto.Levantamientos
+            .Include(l => l.Solicitud)
+                .ThenInclude(s => s.Cliente)
+            .Include(l => l.Solicitud)
+                .ThenInclude(s => s.EstadoSolicitud)
+            .Include(l => l.FotosLevantamientos)
+            .FirstOrDefaultAsync(l => l.LevantamientoId == levantamientoId && !l.IsDeleted);
+    }
+
+    public async Task<Result<List<Levantamientos>>> GetList(Expression<Func<Levantamientos, bool>> criterio)
+    {
+        await using var contexto = await contextFactory.CreateDbContextAsync();
+        return await contexto.Levantamientos
+            .Include(l => l.Solicitud)
+                .ThenInclude(s => s.Cliente)
+            .Include(l => l.Solicitud)
+                .ThenInclude(s => s.EstadoSolicitud)
+            .Include(l => l.FotosLevantamientos)
+            .Where(l => !l.IsDeleted)
+            .Where(criterio)
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task<Result> Eliminar(int levantamientoId)
+    {
+        await using var contexto = await contextFactory.CreateDbContextAsync();
+        var eliminado = await contexto.Levantamientos
+            .Where(l => l.LevantamientoId == levantamientoId && !l.IsDeleted)
+            .ExecuteUpdateAsync(l => l.SetProperty(levantamiento => levantamiento.IsDeleted, true)) > 0;
+        return Result.Success(eliminado);
     }
 }
