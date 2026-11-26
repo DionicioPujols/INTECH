@@ -24,4 +24,18 @@ public class HistorialesService(
             return Result.Success(modifico);
         }
     }
+
+    private async Task<bool> Existe(int historialId)
+    {
+        await using var contexto = await contextFactory.CreateDbContextAsync();
+        return await contexto.Historiales
+            .AnyAsync(h => h.HistorialId == historialId);
+    }
+
+    private async Task<bool> Insertar(Historiales historial)
+    {
+        await using var contexto = await contextFactory.CreateDbContextAsync();
+        contexto.Historiales.Add(historial);
+        return await contexto.SaveChangesAsync() > 0;
+    }
 }
