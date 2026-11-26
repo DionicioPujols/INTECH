@@ -16,7 +16,7 @@ partial class ContextoModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261126201652_AgregarAgendas";
+    public override string LastMigrationId => "20261126215602_EliminarHerramientasOrdenesTrabajo";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -256,6 +256,39 @@ partial class ContextoModelSnapshot : ModelSnapshot
                 b.ToTable("Levantamientos");
             });
 
+        modelBuilder.Entity("INTECH.Models.OrdenesTrabajo", b =>
+            {
+                var ordenTrabajoId = b.Property<int>("OrdenTrabajoId")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
+
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(ordenTrabajoId);
+
+                b.Property<string>("InstruccionesCampo")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
+
+                b.Property<bool>("IsDeleted")
+                    .HasColumnType("bit");
+
+                b.Property<string>("Materiales")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
+
+                b.Property<int>("SolicitudId")
+                    .HasColumnType("int");
+
+                b.Property<string>("Tareas")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
+
+                b.HasKey("OrdenTrabajoId");
+
+                b.HasIndex("SolicitudId");
+
+                b.ToTable("OrdenesTrabajo");
+            });
+
         modelBuilder.Entity("INTECH.Models.Solicitudes", b =>
             {
                 var solicitudId = b.Property<int>("SolicitudId")
@@ -357,6 +390,17 @@ partial class ContextoModelSnapshot : ModelSnapshot
                 b.Navigation("Solicitud");
             });
 
+        modelBuilder.Entity("INTECH.Models.OrdenesTrabajo", b =>
+            {
+                b.HasOne("INTECH.Models.Solicitudes", "Solicitud")
+                    .WithMany("OrdenesTrabajo")
+                    .HasForeignKey("SolicitudId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("Solicitud");
+            });
+
         modelBuilder.Entity("INTECH.Models.Solicitudes", b =>
             {
                 b.HasOne("INTECH.Models.Clientes", "Cliente")
@@ -409,6 +453,8 @@ partial class ContextoModelSnapshot : ModelSnapshot
                 b.Navigation("Agendas");
 
                 b.Navigation("Levantamientos");
+
+                b.Navigation("OrdenesTrabajo");
             });
 #pragma warning restore 612, 618
     }
