@@ -80,3 +80,13 @@
         </div>
     </div>
 </EditForm>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+    public Agendas Agenda { get; set; } = new Agendas();
+    public List<Solicitudes> ListaSolicitudes { get; set; } = new List<Solicitudes>();
+    public List<INTECH.Data.ApplicationUser> ListaTecnicos { get; set; } = new List<INTECH.Data.ApplicationUser>();
+    private string DireccionSeleccionada { get; set; } = string.Empty;
+}
