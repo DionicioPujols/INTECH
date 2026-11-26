@@ -44,6 +44,7 @@ builder.Services.AddScoped<EstadosSolicitudesService>();
 builder.Services.AddScoped<SolicitudesService>();
 builder.Services.AddScoped<ClientesService>();
 builder.Services.AddScoped<LevantamientosService>();
+builder.Services.AddScoped<AgendasService>();
 
 builder.Services.AddBlazorBootstrap();
 
