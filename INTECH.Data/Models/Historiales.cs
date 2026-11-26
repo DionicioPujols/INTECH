@@ -17,4 +17,11 @@ public class Historiales
 
     [Required(ErrorMessage = "Este Campo Es Requerido")]
     public DateTime FechaFinalizacion { get; set; } = DateTime.Today;
+
+    [ForeignKey("SolicitudId")]
+    [InverseProperty("Historiales")]
+    public virtual Solicitudes Solicitud { get; set; } = null!;
+
+    [InverseProperty("Historial")]
+    public virtual ICollection<HistorialesDetalle> HistorialesDetalle { get; set; } = new List<HistorialesDetalle>();
 }

@@ -18,4 +18,8 @@ public class HistorialesDetalle
 
     [Required(ErrorMessage = "Este Campo Es Requerido")]
     public DateTime Fecha { get; set; } = DateTime.Now;
+
+    [ForeignKey("HistorialId")]
+    [InverseProperty("HistorialesDetalle")]
+    public virtual Historiales Historial { get; set; } = null!;
 }
