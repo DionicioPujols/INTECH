@@ -183,5 +183,16 @@
                 </div>
             </div>
         </div>
+        @* Panel de detalle de la visita seleccionada *@
+        <div class="col-12 col-lg-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    @if (VisitaSeleccionada == null)
+                    {
+                        <p class="text-body-secondary text-center mb-0 py-4">Selecciona una visita del calendario para ver su detalle.</p>
+                    }
+                </div>
+            </div>
+        </div>
     </div>
 </div>
