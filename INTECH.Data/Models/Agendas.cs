@@ -14,4 +14,7 @@ public class Agendas
     public int SolicitudId { get; set; }
 
     public string? TecnicoId { get; set; }
+
+    [Required(ErrorMessage = "Este Campo Es Requerido")]
+    public DateTime Fecha { get; set; } = DateTime.Today;
 }
