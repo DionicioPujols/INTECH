@@ -8,7 +8,7 @@ namespace INTECH.Services;
 
 public class OrdenesTrabajoService(
     IDbContextFactory<Contexto> contextFactory
-    )
+    ) : IServiceResult<OrdenesTrabajo, int>
 {
 
     public async Task<Result> Guardar(OrdenesTrabajo ordenTrabajo)
@@ -80,5 +80,14 @@ public class OrdenesTrabajoService(
             .Where(criterio)
             .AsNoTracking()
             .ToListAsync();
+    }
+
+    public async Task<Result> Eliminar(int ordenTrabajoId)
+    {
+        await using var contexto = await contextFactory.CreateDbContextAsync();
+        var eliminado = await contexto.OrdenesTrabajo
+            .Where(o => o.OrdenTrabajoId == ordenTrabajoId && !o.IsDeleted)
+            .ExecuteUpdateAsync(o => o.SetProperty(orden => orden.IsDeleted, true)) > 0;
+        return Result.Success(eliminado);
     }
 }
