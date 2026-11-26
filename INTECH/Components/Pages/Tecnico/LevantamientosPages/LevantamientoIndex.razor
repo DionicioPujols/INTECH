@@ -1,17 +1,152 @@
 @page "/Levantamiento/Index"
 @attribute [Authorize(Roles = "Técnico")]
 
-<PageTitle>Levantamientos | INTECH</PageTitle>
+@inject LevantamientosService levantamientosService
+@inject EstadosSolicitudesService estadosSolicitudesService
+@inject Microsoft.AspNetCore.Identity.UserManager<INTECH.Data.ApplicationUser> userManager
+@inject ToastService toastService
 
-<div class="container-fluid p-0">
-    <div class="card">
-        <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-3">
-            <h1 class="h4 fw-normal mb-0">Levantamientos</h1>
-            <a href="/Levantamiento/Create" class="btn btn-primary d-flex align-items-center gap-2"><span class="bi bi-plus-square" aria-hidden="true"></span> Nuevo levantamiento</a>
+<PageTitle>Registro de Levantamientos</PageTitle>
+<div class="container">
+    <div class="card shadow-lg">
+        <div class="card-header d-flex justify-content-between align-center mb-4">
+            <h5 class="card-title">Registro de Levantamientos</h5>
+            <a href="/Levantamiento/Create" class="btn btn-primary"> <span class="bi bi-plus-square mt-3"></span> Crear Levantamiento</a>
         </div>
-        <div class="card-body py-5">
-            <p class="text-body-secondary mb-0">No hay levantamientos registrados.</p>
+
+        <div class="card-body">
+            @* Tabla *@
+            <div class="grid">
+                <QuickGrid Items="ListaLevantamientos.AsQueryable()" Class="table table-hover mt-3">
+                    <PropertyColumn Property="@(l => l.LevantamientoId)" Title="LevantamientoId" Sortable="true" />
+                    <TemplateColumn Title="Solicitud" Sortable="true" SortBy="@(GridSort<Levantamientos>.ByAscending(l => l.SolicitudId))">
+                        Solicitud #@context.SolicitudId
+                    </TemplateColumn>
+                    <PropertyColumn Property="@(l => l.Solicitud.Cliente.Nombre)" Title="Cliente" Sortable="true" />
+                    <PropertyColumn Property="@(l => l.Solicitud.TipoServicio)" Title="Tipo de Servicio" Sortable="true" />
+                    <TemplateColumn Title="Fecha Programada">
+                        @context.FechaProgramada.ToString("dd/MM/yyyy") · @context.HoraInicio.ToString("hh:mm tt") - @context.HoraFin.ToString("hh:mm tt")
+                    </TemplateColumn>
+                    <TemplateColumn Title="Técnico">
+                        @ObtenerNombreTecnico(context.TecnicoId)
+                    </TemplateColumn>
+                    <TemplateColumn Title="Estado">
+                        <div class="d-flex flex-column align-items-start gap-1">
+                            <span class="badge @ObtenerColorEstado(context.Solicitud.EstadoSolicitudId)">@context.Solicitud.EstadoSolicitud.Nombre</span>
+                            @if (context.EsBorrador)
+                            {
+                                <span class="badge bg-warning-subtle text-warning-emphasis">Borrador guardado</span>
+                            }
+                        </div>
+                    </TemplateColumn>
+                    <TemplateColumn Title="Opciones" Align="Align.Center">
+                        <div class="d-flex text-nowrap">
+                            <a href="/Levantamiento/Iniciar/@context.LevantamientoId" class="btn btn-outline-primary">Iniciar levantamiento</a>
+                            <a href="/Levantamiento/Edit/@context.LevantamientoId" class="btn btn-outline-primary bi bi-pencil-square ms-2"></a>
+                            <button type="button" class="btn btn-outline-danger bi bi-trash ms-2"
+                                    data-bs-toggle="modal" data-bs-target="#modalEliminarLevantamiento"
+                                    @onclick="() => levantamientoIdAEliminar = context.LevantamientoId"></button>
+                        </div>
+                    </TemplateColumn>
+                </QuickGrid>
+            </div>
         </div>
-        <div class="card-footer">Cantidad: 0</div>
+
+        <div class="card-footer d-flex justify-content-between align-center mb-4">
+            <label>Cantidad:  @ListaLevantamientos.Count</label>
+        </div>
     </div>
 </div>
+
+@* Modal de eliminación *@
+<div class="modal fade" id="modalEliminarLevantamiento" tabindex="-1" aria-labelledby="modalEliminarLevantamientoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="modalEliminarLevantamientoLabel">Eliminar Levantamiento</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        ¿Estás seguro de que deseas eliminar este levantamiento?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal" @onclick="Eliminar">Sí, eliminar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+@code {
+    public List<Levantamientos> ListaLevantamientos { get; set; } = new List<Levantamientos>();
+    public List<EstadosSolicitudes> ListaEstadosSolicitudes { get; set; } = new List<EstadosSolicitudes>();
+    public List<INTECH.Data.ApplicationUser> ListaTecnicos { get; set; } = new List<INTECH.Data.ApplicationUser>();
+    private int levantamientoIdAEliminar;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var estadosSolicitudesResult = await estadosSolicitudesService.GetList(e => true);
+        estadosSolicitudesResult.OnSuccess(estadosSolicitudes => ListaEstadosSolicitudes = estadosSolicitudes);
+        estadosSolicitudesResult.OnFailure(() => toastService.ShowError("No se pudieron consultar los estados."));
+
+        var tecnicos = await userManager.GetUsersInRoleAsync("Técnico");
+        ListaTecnicos = tecnicos.ToList();
+
+        await CargarLevantamientos();
+    }
+
+    private async Task CargarLevantamientos()
+    {
+        var levantamientosResult = await levantamientosService.GetList(l => true);
+        levantamientosResult.OnSuccess(levantamientos => ListaLevantamientos = levantamientos);
+        levantamientosResult.OnFailure(() => toastService.ShowError("No se pudieron consultar los levantamientos."));
+    }
+
+    private string ObtenerNombreTecnico(string? tecnicoId)
+    {
+        if (string.IsNullOrWhiteSpace(tecnicoId))
+        {
+            return "Sin asignar";
+        }
+
+        return ListaTecnicos.FirstOrDefault(t => t.Id == tecnicoId)?.UserName ?? "Sin asignar";
+    }
+
+    private string ObtenerColorEstado(int estadoSolicitudId)
+    {
+        if (estadoSolicitudId == 1)
+        {
+            return "bg-warning-subtle text-warning-emphasis";
+        }
+        else if (estadoSolicitudId == 2)
+        {
+            return "bg-primary-subtle text-primary-emphasis";
+        }
+        else if (estadoSolicitudId == 3)
+        {
+            return "bg-primary bg-opacity-10 text-primary";
+        }
+        else if (estadoSolicitudId == 5)
+        {
+            return "bg-warning-subtle text-danger-emphasis";
+        }
+        else if (estadoSolicitudId == 9)
+        {
+            return "bg-success-subtle text-success-emphasis";
+        }
+
+        return "bg-danger-subtle text-danger-emphasis";
+    }
+
+    private async Task Eliminar()
+    {
+        var result = await levantamientosService.Eliminar(levantamientoIdAEliminar);
+        result.OnSuccess(() => toastService.ShowSuccess("Levantamiento eliminado correctamente."));
+        result.OnFailure(() => toastService.ShowError("No se pudo eliminar el levantamiento."));
+
+        if (result.IsSuccess)
+        {
+            await CargarLevantamientos();
+        }
+    }
+}
