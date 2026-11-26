@@ -50,6 +50,35 @@
                     </div>
                 </div>
             </div>
+
+            @* Historial de cambios *@
+            <h6 class="fw-bold mb-3">Historial de cambios</h6>
+            @if (!Historial.HistorialesDetalle.Any())
+            {
+                <p class="text-body-secondary mb-0">No hay cambios registrados para esta solicitud.</p>
+            }
+            else
+            {
+                <ul class="list-group list-group-flush">
+                    @foreach (var cambio in Historial.HistorialesDetalle.OrderByDescending(d => d.Fecha))
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-start gap-3 px-0">
+                            <div class="d-flex align-items-start gap-3">
+                                <span class="badge bg-primary rounded-pill mt-1">&nbsp;</span>
+                                <div>
+                                    <strong>@cambio.Titulo</strong>
+                                    <small class="text-body-secondary d-block">@cambio.Descripcion</small>
+                                </div>
+                            </div>
+                            <small class="text-body-secondary text-nowrap">@cambio.Fecha.ToString("dd/MM/yyyy HH:mm")</small>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+
+        <div class="card-footer text-center mt-2">
+            <a href="/Historial/Index" class="btn btn-secondary"> <span class="bi bi-arrow-left"></span> Volver</a>
         </div>
     </div>
 </div>
