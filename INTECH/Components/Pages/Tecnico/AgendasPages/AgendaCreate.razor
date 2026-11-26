@@ -89,4 +89,14 @@
     public List<Solicitudes> ListaSolicitudes { get; set; } = new List<Solicitudes>();
     public List<INTECH.Data.ApplicationUser> ListaTecnicos { get; set; } = new List<INTECH.Data.ApplicationUser>();
     private string DireccionSeleccionada { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var solicitudesResult = await solicitudesService.GetList(s => true);
+        solicitudesResult.OnSuccess(solicitudes => ListaSolicitudes = solicitudes);
+        solicitudesResult.OnFailure(() => toastService.ShowError("No se pudieron consultar las solicitudes."));
+
+        var tecnicos = await userManager.GetUsersInRoleAsync("Técnico");
+        ListaTecnicos = tecnicos.ToList();
+    }
 }
