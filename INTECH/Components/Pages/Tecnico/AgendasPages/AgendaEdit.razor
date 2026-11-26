@@ -1,0 +1,10 @@
+@page "/Agenda/Edit/{AgendaId:int}"
+@attribute [Authorize(Roles = "Técnico")]
+
+@inject AgendasService agendasService
+@inject SolicitudesService solicitudesService
+@inject Microsoft.AspNetCore.Identity.UserManager<INTECH.Data.ApplicationUser> userManager
+@inject NavigationManager navigationManager
+@inject ToastService toastService
+
+<PageTitle>Modificar Visita</PageTitle>
