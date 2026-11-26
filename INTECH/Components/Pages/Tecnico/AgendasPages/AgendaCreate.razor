@@ -69,6 +69,13 @@
                     <InputDate Type="InputDateType.Time" class="form-control" @bind-Value="Agenda.HoraFin"></InputDate>
                     <ValidationMessage For="(() => Agenda.HoraFin)" />
                 </div>
+
+            </div>
+
+            @* Botones de Acción *@
+            <div class="card-footer text-center mt-2">
+                <a href="/Agenda/Index" class="btn btn-secondary"> <span class="bi bi-arrow-left"></span> Volver</a>
+                <button type="submit" class="btn btn-primary bi bi-floppy"> Guardar visita</button>
             </div>
         </div>
     </div>
