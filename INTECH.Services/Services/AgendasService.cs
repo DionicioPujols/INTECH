@@ -8,7 +8,7 @@ namespace INTECH.Services;
 
 public class AgendasService(
     IDbContextFactory<Contexto> contextFactory
-    )
+    ) : IServiceResult<Agendas, int>
 {
 
     public async Task<Result> Guardar(Agendas agenda)
@@ -81,5 +81,14 @@ public class AgendasService(
             .Where(criterio)
             .AsNoTracking()
             .ToListAsync();
+    }
+
+    public async Task<Result> Eliminar(int agendaId)
+    {
+        await using var contexto = await contextFactory.CreateDbContextAsync();
+        var eliminado = await contexto.Agendas
+            .Where(a => a.AgendaId == agendaId && !a.IsDeleted)
+            .ExecuteUpdateAsync(a => a.SetProperty(agenda => agenda.IsDeleted, true)) > 0;
+        return Result.Success(eliminado);
     }
 }
