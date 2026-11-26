@@ -31,4 +31,11 @@ public class AgendasService(
         return await contexto.Agendas
             .AnyAsync(a => a.AgendaId == agendaId);
     }
+
+    private async Task<bool> Insertar(Agendas agenda)
+    {
+        await using var contexto = await contextFactory.CreateDbContextAsync();
+        contexto.Agendas.Add(agenda);
+        return await contexto.SaveChangesAsync() > 0;
+    }
 }
