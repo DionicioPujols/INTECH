@@ -224,6 +224,13 @@
                             <small class="text-body-secondary d-block">Técnico asignado</small>
                             <span>@ObtenerNombreTecnico(VisitaSeleccionada.TecnicoId)</span>
                         </div>
+
+                        <div class="d-flex gap-2">
+                            <a href="/Agenda/Edit/@VisitaSeleccionada.AgendaId" class="btn btn-outline-primary bi bi-pencil-square flex-grow-1"> Editar</a>
+                            <button type="button" class="btn btn-outline-danger bi bi-trash flex-grow-1"
+                                    data-bs-toggle="modal" data-bs-target="#modalEliminarAgenda"
+                                    @onclick="() => agendaIdAEliminar = VisitaSeleccionada.AgendaId"> Eliminar</button>
+                        </div>
                     }
                 </div>
             </div>
