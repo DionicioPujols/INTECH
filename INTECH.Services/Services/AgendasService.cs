@@ -24,4 +24,11 @@ public class AgendasService(
             return Result.Success(modifico);
         }
     }
+
+    private async Task<bool> Existe(int agendaId)
+    {
+        await using var contexto = await contextFactory.CreateDbContextAsync();
+        return await contexto.Agendas
+            .AnyAsync(a => a.AgendaId == agendaId);
+    }
 }
