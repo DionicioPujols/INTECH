@@ -132,4 +132,26 @@
         var solicitud = ListaSolicitudes.FirstOrDefault(s => s.SolicitudId == Agenda.SolicitudId);
         DireccionSeleccionada = solicitud?.Direccion ?? Agenda.Solicitud?.Direccion ?? string.Empty;
     }
+
+    public async Task Modificar()
+    {
+        if (Agenda.HoraFin <= Agenda.HoraInicio)
+        {
+            toastService.ShowError("La hora de fin debe ser mayor que la hora de inicio.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(Agenda.TecnicoId))
+        {
+            Agenda.TecnicoId = null;
+        }
+
+        var result = await agendasService.Guardar(Agenda);
+        result.OnSuccess(() =>
+        {
+            toastService.ShowSuccess("Visita modificada correctamente.");
+            navigationManager.NavigateTo("/Agenda/Index");
+        });
+        result.OnFailure(() => toastService.ShowError("No se pudo modificar la visita."));
+    }
 }
