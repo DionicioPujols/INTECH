@@ -23,4 +23,8 @@ public class Agendas
 
     [Required(ErrorMessage = "Este Campo Es Requerido")]
     public TimeOnly HoraFin { get; set; } = new TimeOnly(9, 0);
+
+    [ForeignKey("SolicitudId")]
+    [InverseProperty("Agendas")]
+    public virtual Solicitudes Solicitud { get; set; } = null!;
 }
