@@ -32,9 +32,49 @@ public class LevantamientosService(
             .AnyAsync(l => l.LevantamientoId == levantamientoId);
     }
 
+    private async Task<bool> EsLevantamientoValido(Contexto contexto, Levantamientos levantamiento)
+    {
+        if (string.IsNullOrWhiteSpace(levantamiento.TecnicoId))
+        {
+            levantamiento.TecnicoId = null;
+        }
+
+        if (levantamiento.FechaProgramada.DayOfWeek == DayOfWeek.Sunday)
+        {
+            return false;
+        }
+
+        if (levantamiento.HoraInicio < new TimeOnly(8, 0) || levantamiento.HoraFin > new TimeOnly(18, 0) || levantamiento.HoraFin <= levantamiento.HoraInicio)
+        {
+            return false;
+        }
+
+        var solicitud = await contexto.Solicitudes
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.SolicitudId == levantamiento.SolicitudId && !s.IsDeleted);
+        if (solicitud == null || solicitud.EstadoSolicitudId == 9 || solicitud.EstadoSolicitudId == 10)
+        {
+            return false;
+        }
+
+        var levantamientoDuplicado = await contexto.Levantamientos
+            .AnyAsync(l => !l.IsDeleted && l.SolicitudId == levantamiento.SolicitudId && l.LevantamientoId != levantamiento.LevantamientoId);
+        if (levantamientoDuplicado)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
     private async Task<bool> Insertar(Levantamientos levantamiento)
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
+        if (!await EsLevantamientoValido(contexto, levantamiento))
+        {
+            return false;
+        }
+
         contexto.Levantamientos.Add(levantamiento);
         return await contexto.SaveChangesAsync() > 0;
     }
@@ -44,8 +84,13 @@ public class LevantamientosService(
         await using var contexto = await contextFactory.CreateDbContextAsync();
         var levantamientoExistente = await contexto.Levantamientos
             .Include(l => l.FotosLevantamientos)
-            .SingleOrDefaultAsync(l => l.LevantamientoId == levantamiento.LevantamientoId);
+            .SingleOrDefaultAsync(l => l.LevantamientoId == levantamiento.LevantamientoId && !l.IsDeleted);
         if (levantamientoExistente == null)
+        {
+            return false;
+        }
+
+        if (!await EsLevantamientoValido(contexto, levantamiento))
         {
             return false;
         }
@@ -108,9 +153,18 @@ public class LevantamientosService(
     public async Task<Result> Eliminar(int levantamientoId)
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
+        var levantamiento = await contexto.Levantamientos
+            .Include(l => l.Solicitud)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(l => l.LevantamientoId == levantamientoId && !l.IsDeleted);
+        if (levantamiento == null || levantamiento.Solicitud.EstadoSolicitudId == 2 || levantamiento.Solicitud.EstadoSolicitudId == 3 || levantamiento.Solicitud.EstadoSolicitudId == 9)
+        {
+            return Result.Success(false);
+        }
+
         var eliminado = await contexto.Levantamientos
             .Where(l => l.LevantamientoId == levantamientoId && !l.IsDeleted)
-            .ExecuteUpdateAsync(l => l.SetProperty(levantamiento => levantamiento.IsDeleted, true)) > 0;
+            .ExecuteUpdateAsync(l => l.SetProperty(levantamientoItem => levantamientoItem.IsDeleted, true)) > 0;
         return Result.Success(eliminado);
     }
 }
