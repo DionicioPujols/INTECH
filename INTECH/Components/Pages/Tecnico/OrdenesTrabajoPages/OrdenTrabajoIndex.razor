@@ -75,6 +75,22 @@
                     </InputSelect>
                 </div>
             </div>
+
+            @* Tabla *@
+            <div class="grid table-responsive">
+                <QuickGrid Items="ListaOrdenesTrabajo.AsQueryable()" Class="table table-hover mt-3">
+                    <PropertyColumn Property="@(o => o.OrdenTrabajoId)" Title="OrdenTrabajoId" Sortable="true" />
+                    <PropertyColumn Property="@(o => o.SolicitudId)" Title="SolicitudId" Sortable="true" />
+                    <PropertyColumn Property="@(o => o.Solicitud.Cliente.Nombre)" Title="Cliente" Sortable="true" />
+                    <PropertyColumn Property="@(o => o.Solicitud.TipoServicio)" Title="Tipo de Servicio" Sortable="true" />
+                    <PropertyColumn Property="@(o => o.Tareas)" Title="Tareas" Sortable="true" />
+                    <PropertyColumn Property="@(o => o.Materiales)" Title="Materiales" Sortable="true" />
+                    <PropertyColumn Property="@(o => o.InstruccionesCampo)" Title="Instrucciones" Sortable="true" />
+                    <TemplateColumn Title="Estado">
+                        <span class="badge @ObtenerColorEstado(context.Solicitud.EstadoSolicitudId)">@context.Solicitud.EstadoSolicitud.Nombre</span>
+                    </TemplateColumn>
+                </QuickGrid>
+            </div>
         </div>
     </div>
 </div>
