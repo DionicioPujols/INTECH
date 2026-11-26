@@ -209,6 +209,14 @@ html, body {
     opacity: 0.85;
 }
 
+.tecnico-layout .fc-col-hora {
+    width: 75px;
+}
+
+.tecnico-layout .fc-more-label {
+    font-size: 0.7rem;
+}
+
 @media (min-width: 768px) {
     .tecnico-sidebar {
         width: 250px;
