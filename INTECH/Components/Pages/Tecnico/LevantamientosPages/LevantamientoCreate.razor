@@ -93,15 +93,43 @@
 
     public async Task Guardar()
     {
+        if (string.IsNullOrWhiteSpace(Levantamiento.TecnicoId))
+        {
+            Levantamiento.TecnicoId = null;
+        }
+
+        if (Levantamiento.FechaProgramada.DayOfWeek == DayOfWeek.Sunday)
+        {
+            toastService.ShowError("No se pueden programar levantamientos los domingos.");
+            return;
+        }
+
+        if (Levantamiento.HoraInicio < new TimeOnly(8, 0) || Levantamiento.HoraFin > new TimeOnly(18, 0))
+        {
+            toastService.ShowError("El horario permitido es de 08:00 AM a 06:00 PM.");
+            return;
+        }
+
         if (Levantamiento.HoraFin <= Levantamiento.HoraInicio)
         {
             toastService.ShowError("La hora de fin debe ser mayor que la hora de inicio.");
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(Levantamiento.TecnicoId))
+        var solicitud = ListaSolicitudes.FirstOrDefault(s => s.SolicitudId == Levantamiento.SolicitudId);
+        if (solicitud != null && (solicitud.EstadoSolicitudId == 9 || solicitud.EstadoSolicitudId == 10))
         {
-            Levantamiento.TecnicoId = null;
+            toastService.ShowError("No se puede crear un levantamiento para una solicitud finalizada o cancelada.");
+            return;
+        }
+
+        var levantamientosMismaSolicitudResult = await levantamientosService.GetList(l => l.SolicitudId == Levantamiento.SolicitudId && l.LevantamientoId != Levantamiento.LevantamientoId);
+        var levantamientoYaExiste = false;
+        levantamientosMismaSolicitudResult.OnSuccess(lista => levantamientoYaExiste = lista.Any());
+        if (levantamientoYaExiste)
+        {
+            toastService.ShowError("La solicitud seleccionada ya tiene un levantamiento asignado.");
+            return;
         }
 
         var creadoResult = await levantamientosService.Guardar(Levantamiento);
