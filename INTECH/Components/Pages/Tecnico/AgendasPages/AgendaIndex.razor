@@ -291,4 +291,36 @@
         agendasResult.OnSuccess(agendas => ListaAgendas = agendas);
         agendasResult.OnFailure(() => toastService.ShowError("No se pudieron consultar las visitas."));
     }
+
+    private string TituloPeriodo => VistaActual switch
+    {
+        VistaAgenda.Hoy => FechaReferencia.ToString("dddd, dd 'de' MMMM 'de' yyyy", Cultura),
+        VistaAgenda.Semanal => $"{ObtenerDiasSemana().First().ToString("dd MMM", Cultura)} - {ObtenerDiasSemana().Last().ToString("dd MMM yyyy", Cultura)}",
+        _ => FechaReferencia.ToString("MMMM yyyy", Cultura)
+    };
+
+    private void Anterior()
+    {
+        FechaReferencia = VistaActual switch
+        {
+            VistaAgenda.Hoy => FechaReferencia.AddDays(-1),
+            VistaAgenda.Semanal => FechaReferencia.AddDays(-7),
+            _ => FechaReferencia.AddMonths(-1)
+        };
+    }
+
+    private void Siguiente()
+    {
+        FechaReferencia = VistaActual switch
+        {
+            VistaAgenda.Hoy => FechaReferencia.AddDays(1),
+            VistaAgenda.Semanal => FechaReferencia.AddDays(7),
+            _ => FechaReferencia.AddMonths(1)
+        };
+    }
+
+    private void IrAHoy()
+    {
+        FechaReferencia = DateTime.Today;
+    }
 }
