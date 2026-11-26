@@ -100,6 +100,28 @@ public class ClientesService(
     public async Task<Result> Eliminar(int clienteId)
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
+
+        var tieneSolicitudesActivas = await contexto.Solicitudes
+            .AnyAsync(s => !s.IsDeleted && s.ClienteId == clienteId && (s.EstadoSolicitudId == 2 || s.EstadoSolicitudId == 3));
+        if (tieneSolicitudesActivas)
+            return Result.Success(false);
+
+        var solicitudIds = await contexto.Solicitudes
+            .Where(s => !s.IsDeleted && s.ClienteId == clienteId)
+            .Select(s => s.SolicitudId)
+            .ToListAsync();
+
+        if (solicitudIds.Count > 0)
+        {
+            await contexto.Agendas
+                .Where(a => !a.IsDeleted && solicitudIds.Contains(a.SolicitudId))
+                .ExecuteUpdateAsync(a => a.SetProperty(agenda => agenda.IsDeleted, true));
+
+            await contexto.Solicitudes
+                .Where(s => !s.IsDeleted && s.ClienteId == clienteId)
+                .ExecuteUpdateAsync(s => s.SetProperty(solicitud => solicitud.IsDeleted, true));
+        }
+
         var eliminado = await contexto.Clientes
             .Where(c => c.ClienteId == clienteId && !c.IsDeleted)
             .ExecuteUpdateAsync(c => c.SetProperty(cliente => cliente.IsDeleted, true)) > 0;
