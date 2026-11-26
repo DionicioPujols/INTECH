@@ -103,6 +103,13 @@
 
     public async Task Modificar()
     {
+        var solicitud = ListaSolicitudes.FirstOrDefault(s => s.SolicitudId == OrdenTrabajo.SolicitudId);
+        if ((solicitud?.EstadoSolicitudId ?? OrdenTrabajo.Solicitud?.EstadoSolicitudId) == 9)
+        {
+            toastService.ShowError("No se puede modificar una orden de trabajo cuya solicitud está finalizada.");
+            return;
+        }
+
         OrdenTrabajo.Tareas = OrdenTrabajo.Tareas.Trim();
         OrdenTrabajo.Materiales = OrdenTrabajo.Materiales.Trim();
         OrdenTrabajo.InstruccionesCampo = OrdenTrabajo.InstruccionesCampo.Trim();
@@ -118,6 +125,14 @@
 
     private async Task Eliminar()
     {
+        var solicitud = ListaSolicitudes.FirstOrDefault(s => s.SolicitudId == OrdenTrabajo.SolicitudId);
+        var estadoSolicitudId = solicitud?.EstadoSolicitudId ?? OrdenTrabajo.Solicitud?.EstadoSolicitudId;
+        if (estadoSolicitudId == 8 || estadoSolicitudId == 9)
+        {
+            toastService.ShowError("No se puede eliminar una orden de trabajo pendiente de cobro o finalizada.");
+            return;
+        }
+
         var result = await ordenesTrabajoService.Eliminar(OrdenTrabajoId);
         result.OnSuccess(() =>
         {
