@@ -145,6 +145,22 @@
                                 <div>@diaNombre</div>
                             }
                         </div>
+
+                        <div class="fc-grid-7 border-start">
+                            @foreach (var fecha in ObtenerDiasMes())
+                            {
+                                var esMesActual = fecha.Month == FechaReferencia.Month;
+                                var esHoy = fecha.Date == DateTime.Today;
+
+                                <div class="fc-day-cell border-end border-bottom p-2 @(esMesActual ? "bg-white" : "bg-light text-muted")">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="badge rounded-pill @(esHoy ? "bg-primary" : "text-dark fw-normal")">
+                                            @fecha.Day
+                                        </span>
+                                    </div>
+                                </div>
+                            }
+                        </div>
                     }
                 </div>
             </div>
