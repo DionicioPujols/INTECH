@@ -43,4 +43,7 @@ public class Solicitudes
 
     [InverseProperty("Solicitud")]
     public virtual ICollection<OrdenesTrabajo> OrdenesTrabajo { get; set; } = new List<OrdenesTrabajo>();
+
+    [InverseProperty("Solicitud")]
+    public virtual ICollection<Historiales> Historiales { get; set; } = new List<Historiales>();
 }

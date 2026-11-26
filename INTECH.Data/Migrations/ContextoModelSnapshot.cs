@@ -16,7 +16,7 @@ partial class ContextoModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261126215602_EliminarHerramientasOrdenesTrabajo";
+    public override string LastMigrationId => "20261126221401_AgregarHistorialYDetalle";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -194,6 +194,62 @@ partial class ContextoModelSnapshot : ModelSnapshot
                 b.HasIndex("LevantamientoId");
 
                 b.ToTable("FotosLevantamientos");
+            });
+
+        modelBuilder.Entity("INTECH.Models.Historiales", b =>
+            {
+                var historialId = b.Property<int>("HistorialId")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
+
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(historialId);
+
+                b.Property<DateTime>("FechaFinalizacion")
+                    .HasColumnType("datetime2");
+
+                b.Property<bool>("IsDeleted")
+                    .HasColumnType("bit");
+
+                b.Property<int>("SolicitudId")
+                    .HasColumnType("int");
+
+                b.Property<string>("TecnicoId")
+                    .HasColumnType("nvarchar(max)");
+
+                b.HasKey("HistorialId");
+
+                b.HasIndex("SolicitudId");
+
+                b.ToTable("Historiales");
+            });
+
+        modelBuilder.Entity("INTECH.Models.HistorialesDetalle", b =>
+            {
+                var detalleId = b.Property<int>("DetalleId")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
+
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(detalleId);
+
+                b.Property<string>("Descripcion")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
+
+                b.Property<DateTime>("Fecha")
+                    .HasColumnType("datetime2");
+
+                b.Property<int>("HistorialId")
+                    .HasColumnType("int");
+
+                b.Property<string>("Titulo")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
+
+                b.HasKey("DetalleId");
+
+                b.HasIndex("HistorialId");
+
+                b.ToTable("HistorialesDetalle");
             });
 
         modelBuilder.Entity("INTECH.Models.Levantamientos", b =>
@@ -379,6 +435,28 @@ partial class ContextoModelSnapshot : ModelSnapshot
                 b.Navigation("Levantamiento");
             });
 
+        modelBuilder.Entity("INTECH.Models.Historiales", b =>
+            {
+                b.HasOne("INTECH.Models.Solicitudes", "Solicitud")
+                    .WithMany("Historiales")
+                    .HasForeignKey("SolicitudId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("Solicitud");
+            });
+
+        modelBuilder.Entity("INTECH.Models.HistorialesDetalle", b =>
+            {
+                b.HasOne("INTECH.Models.Historiales", "Historial")
+                    .WithMany("HistorialesDetalle")
+                    .HasForeignKey("HistorialId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("Historial");
+            });
+
         modelBuilder.Entity("INTECH.Models.Levantamientos", b =>
             {
                 b.HasOne("INTECH.Models.Solicitudes", "Solicitud")
@@ -443,6 +521,11 @@ partial class ContextoModelSnapshot : ModelSnapshot
                 b.Navigation("Solicitudes");
             });
 
+        modelBuilder.Entity("INTECH.Models.Historiales", b =>
+            {
+                b.Navigation("HistorialesDetalle");
+            });
+
         modelBuilder.Entity("INTECH.Models.Levantamientos", b =>
             {
                 b.Navigation("FotosLevantamientos");
@@ -451,6 +534,8 @@ partial class ContextoModelSnapshot : ModelSnapshot
         modelBuilder.Entity("INTECH.Models.Solicitudes", b =>
             {
                 b.Navigation("Agendas");
+
+                b.Navigation("Historiales");
 
                 b.Navigation("Levantamientos");
 

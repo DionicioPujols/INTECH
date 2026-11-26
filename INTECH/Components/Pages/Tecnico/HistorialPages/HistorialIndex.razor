@@ -1,17 +1,278 @@
 @page "/Historial/Index"
 @attribute [Authorize(Roles = "Técnico")]
 
-<PageTitle>Historial | INTECH</PageTitle>
+@inject HistorialesService historialesService
+@inject Microsoft.AspNetCore.Identity.UserManager<INTECH.Data.ApplicationUser> userManager
+@inject ToastService toastService
 
-<div class="container-fluid p-0">
-    <div class="card">
-        <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-3">
-            <h1 class="h4 fw-normal mb-0">Historial</h1>
-            
+<PageTitle>Registro de Historial</PageTitle>
+<div class="container">
+    <div class="card shadow-lg">
+        <div class="card-header d-flex justify-content-between align-center mb-4">
+            <h5 class="card-title">Registro de Historial</h5>
         </div>
-        <div class="card-body py-5">
-            <p class="text-body-secondary mb-0">No hay actividades registradas.</p>
+
+        <div class="card-body">
+            @* Filtro *@
+            <div class="row">
+                <div class="col-3">
+                    <label class="col-form-label"><strong>Filtrar por</strong></label>
+                </div>
+                <div class="col-4">
+                    <label class="col-form-label"><strong>Búsqueda</strong></label>
+                </div>
+            </div>
+
+            @* Controles de búsqueda *@
+            <div class="row align-items-center">
+                <div class="col-3">
+                    <InputSelect class="form-select" @bind-Value="Filtro">
+                        <option value="" selected disabled>Elija una opci&oacute;n</option>
+                        <option value="HistorialId">HistorialId</option>
+                        <option value="SolicitudId">SolicitudId</option>
+                        <option value="Cliente">Cliente</option>
+                        <option value="TipoServicio">Tipo de Servicio</option>
+                        <option value="Tecnico">Técnico</option>
+                        <option value="Fecha">Fecha Finalización</option>
+                    </InputSelect>
+                </div>
+                <div class="col-4">
+                    <div class="input-group">
+                        <input class="form-control" @bind="ValorFiltro" placeholder="Buscar" />
+                        <button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"></button>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-3">
+                    <label class="col-form-label"><strong>Desde</strong></label>
+                    <InputDate class="form-control" @bind-Value="Desde"></InputDate>
+                </div>
+                <div class="col-3">
+                    <label class="col-form-label"><strong>Hasta</strong></label>
+                    <InputDate class="form-control" @bind-Value="Hasta"></InputDate>
+                </div>
+                <div class="col-3">
+                    <label class="col-form-label"><strong>Tipo de servicio</strong></label>
+                    <InputSelect class="form-select" @bind-Value="TipoServicioFiltro">
+                        <option value="">Todos</option>
+                        <option value="Cableado Estructurado">Cableado Estructurado</option>
+                        <option value="Instalación de Paneles Solares">Instalación de Paneles Solares</option>
+                        <option value="Instalación de Planta Eléctrica">Instalación de Planta Eléctrica</option>
+                        <option value="Instalación de Sistema UPS">Instalación de Sistema UPS</option>
+                        <option value="Mantenimiento Eléctrico">Mantenimiento Eléctrico</option>
+                    </InputSelect>
+                </div>
+                <div class="col-3">
+                    <label class="col-form-label"><strong>Técnico</strong></label>
+                    <InputSelect class="form-select" @bind-Value="TecnicoFiltroId">
+                        <option value="">Todos</option>
+                        <option value="SIN_ASIGNAR">Sin asignar</option>
+                        @foreach (var tecnico in ListaTecnicos)
+                        {
+                            <option value="@tecnico.Id">@tecnico.UserName</option>
+                        }
+                    </InputSelect>
+                </div>
+            </div>
+
+            @* Tabla *@
+            <div class="grid table-responsive">
+                <QuickGrid Items="ListaHistoriales.AsQueryable()" Class="table table-hover mt-3">
+                    <PropertyColumn Property="@(h => h.HistorialId)" Title="HistorialId" Sortable="true" />
+                    <PropertyColumn Property="@(h => h.SolicitudId)" Title="SolicitudId" Sortable="true" />
+                    <PropertyColumn Property="@(h => h.Solicitud.Cliente.Nombre)" Title="Cliente" Sortable="true" />
+                    <PropertyColumn Property="@(h => h.Solicitud.TipoServicio)" Title="Tipo de Servicio" Sortable="true" />
+                    <PropertyColumn Property="@(h => h.FechaFinalizacion)" Title="Fecha Finalización" Format="dd/MM/yyyy" Sortable="true" />
+                    <TemplateColumn Title="Técnico">
+                        @ObtenerNombreTecnico(context.TecnicoId)
+                    </TemplateColumn>
+                    <TemplateColumn Title="Estado">
+                        <span class="badge @ObtenerColorEstado(context.Solicitud.EstadoSolicitudId)">@context.Solicitud.EstadoSolicitud.Nombre</span>
+                    </TemplateColumn>
+                    <TemplateColumn Title="Acción" Align="Align.Center">
+                        <div class="d-flex text-nowrap justify-content-center">
+                            <a href="/Historial/Detalle/@context.HistorialId" class="btn btn-outline-primary bi bi-eye"></a>
+                        </div>
+                    </TemplateColumn>
+                </QuickGrid>
+            </div>
         </div>
-        <div class="card-footer">Cantidad: 0</div>
+
+        <div class="card-footer d-flex justify-content-between align-center mb-4">
+            <label>Cantidad:  @ListaHistoriales.Count</label>
+        </div>
     </div>
 </div>
+
+@code {
+    public List<Historiales> ListaHistoriales { get; set; } = new List<Historiales>();
+    public List<INTECH.Data.ApplicationUser> ListaTecnicos { get; set; } = new List<INTECH.Data.ApplicationUser>();
+    public string Filtro { get; set; } = string.Empty;
+    public string ValorFiltro { get; set; } = string.Empty;
+    public DateTime? Desde { get; set; }
+    public DateTime? Hasta { get; set; }
+    public string TipoServicioFiltro { get; set; } = string.Empty;
+    public string TecnicoFiltroId { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var tecnicos = await userManager.GetUsersInRoleAsync("Técnico");
+        ListaTecnicos = tecnicos.ToList();
+
+        await CargarHistoriales();
+        Desde = null;
+        Hasta = null;
+    }
+
+    private async Task CargarHistoriales()
+    {
+        var historialesResult = await historialesService.GetList(h => true);
+        historialesResult.OnSuccess(historiales => ListaHistoriales = historiales);
+        historialesResult.OnFailure(() => toastService.ShowError("No se pudieron consultar los historiales."));
+    }
+
+    private string ObtenerNombreTecnico(string? tecnicoId)
+    {
+        if (string.IsNullOrWhiteSpace(tecnicoId))
+        {
+            return "Sin asignar";
+        }
+
+        return ListaTecnicos.FirstOrDefault(t => t.Id == tecnicoId)?.UserName ?? "Sin asignar";
+    }
+
+    private string ObtenerColorEstado(int estadoSolicitudId)
+    {
+        if (estadoSolicitudId == 1)
+        {
+            return "bg-warning-subtle text-warning-emphasis";
+        }
+        else if (estadoSolicitudId == 2)
+        {
+            return "bg-primary-subtle text-primary-emphasis";
+        }
+        else if (estadoSolicitudId == 3)
+        {
+            return "bg-primary bg-opacity-10 text-primary";
+        }
+        else if (estadoSolicitudId == 5)
+        {
+            return "bg-warning-subtle text-danger-emphasis";
+        }
+        else if (estadoSolicitudId == 9)
+        {
+            return "bg-success-subtle text-success-emphasis";
+        }
+
+        return "bg-danger-subtle text-danger-emphasis";
+    }
+
+    private async Task Buscar()
+    {
+        var valor = ValorFiltro.Trim().ToLower();
+        if (Filtro == "Fecha")
+        {
+            if (Desde == null || Hasta == null)
+            {
+                toastService.ShowError("Seleccione las fechas desde y hasta.");
+                return;
+            }
+
+            if (Desde > Hasta)
+            {
+                toastService.ShowWarning("La fecha desde no puede ser mayor que la fecha hasta.");
+                return;
+            }
+
+            var historialesPorFechaResult = await historialesService.GetList(h =>
+                h.FechaFinalizacion >= Desde && h.FechaFinalizacion <= Hasta);
+            historialesPorFechaResult.OnSuccess(historiales => ListaHistoriales = historiales);
+            historialesPorFechaResult.OnFailure(() =>
+                toastService.ShowError("No se pudieron consultar los historiales."));
+        }
+        else if (Filtro == "TipoServicio")
+        {
+            if (TipoServicioFiltro != "")
+            {
+                var historialesPorTipoResult = await historialesService.GetList(h => h.Solicitud.TipoServicio == TipoServicioFiltro);
+                historialesPorTipoResult.OnSuccess(historiales => ListaHistoriales = historiales);
+                historialesPorTipoResult.OnFailure(() =>
+                    toastService.ShowError("No se pudieron consultar los historiales."));
+            }
+            else if (valor != "")
+            {
+                var historialesPorTipoResult = await historialesService.GetList(h => h.Solicitud.TipoServicio.ToLower().Contains(valor));
+                historialesPorTipoResult.OnSuccess(historiales => ListaHistoriales = historiales);
+                historialesPorTipoResult.OnFailure(() =>
+                    toastService.ShowError("No se pudieron consultar los historiales."));
+            }
+            else
+            {
+                await CargarHistoriales();
+            }
+        }
+        else if (Filtro == "Tecnico")
+        {
+            if (TecnicoFiltroId == "")
+            {
+                await CargarHistoriales();
+                return;
+            }
+            else if (TecnicoFiltroId == "SIN_ASIGNAR")
+            {
+                var historialesSinTecnicoResult = await historialesService.GetList(h => string.IsNullOrEmpty(h.TecnicoId));
+                historialesSinTecnicoResult.OnSuccess(historiales => ListaHistoriales = historiales);
+                historialesSinTecnicoResult.OnFailure(() =>
+                    toastService.ShowError("No se pudieron consultar los historiales."));
+                return;
+            }
+
+            var historialesPorTecnicoResult = await historialesService.GetList(h => h.TecnicoId == TecnicoFiltroId);
+            historialesPorTecnicoResult.OnSuccess(historiales => ListaHistoriales = historiales);
+            historialesPorTecnicoResult.OnFailure(() =>
+                toastService.ShowError("No se pudieron consultar los historiales."));
+        }
+        else if (valor == "")
+        {
+            await CargarHistoriales();
+        }
+        else if (Filtro == "HistorialId")
+        {
+            if (!int.TryParse(valor, out var historialId))
+            {
+                toastService.ShowError("Ingrese un número de historial válido.");
+                return;
+            }
+
+            var historialesPorIdResult = await historialesService.GetList(h => h.HistorialId == historialId);
+            historialesPorIdResult.OnSuccess(historiales => ListaHistoriales = historiales);
+            historialesPorIdResult.OnFailure(() =>
+                toastService.ShowError("No se pudieron consultar los historiales."));
+        }
+        else if (Filtro == "SolicitudId")
+        {
+            if (!int.TryParse(valor, out var solicitudId))
+            {
+                toastService.ShowError("Ingrese un número de solicitud válido.");
+                return;
+            }
+
+            var historialesPorSolicitudResult = await historialesService.GetList(h => h.SolicitudId == solicitudId);
+            historialesPorSolicitudResult.OnSuccess(historiales => ListaHistoriales = historiales);
+            historialesPorSolicitudResult.OnFailure(() =>
+                toastService.ShowError("No se pudieron consultar los historiales."));
+        }
+        else if (Filtro == "Cliente")
+        {
+            var historialesPorClienteResult = await historialesService.GetList(h => h.Solicitud.Cliente.Nombre.ToLower().Contains(valor));
+            historialesPorClienteResult.OnSuccess(historiales => ListaHistoriales = historiales);
+            historialesPorClienteResult.OnFailure(() =>
+                toastService.ShowError("No se pudieron consultar los historiales."));
+        }
+        else
+        {
+            toastService.ShowError("Seleccione un filtro.");
+        }
+    }
+}
