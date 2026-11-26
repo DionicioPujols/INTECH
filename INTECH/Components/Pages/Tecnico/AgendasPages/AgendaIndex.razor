@@ -43,6 +43,18 @@
                         </div>
                         <button type="button" class="btn btn-primary" @onclick="Buscar">Buscar</button>
                     </div>
+
+                    @* Navegación del periodo *@
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="Anterior">
+                            <span class="bi bi-chevron-left"></span>
+                        </button>
+                        <span class="fw-medium text-capitalize">@TituloPeriodo</span>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="Siguiente">
+                            <span class="bi bi-chevron-right"></span>
+                        </button>
+                        <button type="button" class="btn btn-outline-primary btn-sm ms-auto" @onclick="IrAHoy">Hoy</button>
+                    </div>
                 </div>
             </div>
         </div>
