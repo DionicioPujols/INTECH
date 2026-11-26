@@ -223,6 +223,13 @@
 
     private async Task Eliminar()
     {
+        var levantamiento = ListaLevantamientos.FirstOrDefault(l => l.LevantamientoId == levantamientoIdAEliminar);
+        if (levantamiento != null && (levantamiento.Solicitud.EstadoSolicitudId == 2 || levantamiento.Solicitud.EstadoSolicitudId == 3 || levantamiento.Solicitud.EstadoSolicitudId == 9))
+        {
+            toastService.ShowError("No se puede eliminar un levantamiento cuya solicitud está en proceso, en espera de administración o finalizada.");
+            return;
+        }
+
         var result = await levantamientosService.Eliminar(levantamientoIdAEliminar);
         result.OnSuccess(() => toastService.ShowSuccess("Levantamiento eliminado correctamente."));
         result.OnFailure(() => toastService.ShowError("No se pudo eliminar el levantamiento."));
