@@ -38,4 +38,17 @@ public class AgendasService(
         contexto.Agendas.Add(agenda);
         return await contexto.SaveChangesAsync() > 0;
     }
+
+    private async Task<bool> Modificar(Agendas agenda)
+    {
+        await using var contexto = await contextFactory.CreateDbContextAsync();
+        var agendaExistente = await contexto.Agendas
+            .SingleOrDefaultAsync(a => a.AgendaId == agenda.AgendaId);
+        if (agendaExistente == null)
+        {
+            return false;
+        }
+
+        return false;
+    }
 }
