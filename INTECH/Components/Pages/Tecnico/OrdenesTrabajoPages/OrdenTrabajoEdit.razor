@@ -1,0 +1,20 @@
+@page "/OrdenTrabajo/Edit/{OrdenTrabajoId:int}"
+@attribute [Authorize(Roles = "Técnico")]
+
+@inject OrdenesTrabajoService ordenesTrabajoService
+@inject SolicitudesService solicitudesService
+@inject NavigationManager navigationManager
+@inject ToastService toastService
+
+<PageTitle>Modificar Orden de Trabajo</PageTitle>
+<EditForm Model="OrdenTrabajo" OnValidSubmit="Modificar">
+    <DataAnnotationsValidator />
+
+    <div class="container">
+        <div class="card shadow-lg">
+            <div class="card-header text-center">
+                <h5 class="card-title">Modificar Orden de Trabajo</h5>
+            </div>
+        </div>
+    </div>
+</EditForm>
