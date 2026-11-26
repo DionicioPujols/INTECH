@@ -78,6 +78,33 @@
                     <InputTextArea class="form-control" @bind-Value="Levantamiento.Observaciones" placeholder="Ej.: Se recomienda coordinar el acceso y validar los materiales antes de iniciar."></InputTextArea>
                 </div>
 
+                @* Fotografías *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Fotografías</strong></label>
+                    <InputFile class="form-control" OnChange="CargarFotos" multiple accept="image/*" />
+                    <small class="text-body-secondary">Tamaño máximo por imagen: 5 MB.</small>
+
+                    @if (Levantamiento.FotosLevantamientos.Any())
+                    {
+                        <div class="row g-3 mt-2">
+                            @foreach (var foto in Levantamiento.FotosLevantamientos)
+                            {
+                                <div class="col-6 col-md-3">
+                                    <div class="card h-100">
+                                        <img src="@($"data:{foto.TipoContenido};base64,{Convert.ToBase64String(foto.Contenido)}")" class="card-img-top" alt="@foto.NombreArchivo" />
+                                        <div class="card-body p-2">
+                                            <small class="text-body-secondary d-block text-truncate">@foto.NombreArchivo</small>
+                                        </div>
+                                        <div class="card-footer text-center p-2">
+                                            <button type="button" class="btn btn-outline-danger btn-sm bi bi-trash" @onclick="() => RemoverFoto(foto)"></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
             </div>
 
             @* Botones de Acción *@
@@ -112,5 +139,41 @@
         }
 
         return ListaTecnicos.FirstOrDefault(t => t.Id == tecnicoId)?.UserName ?? "Sin asignar";
+    }
+
+    private async Task CargarFotos(InputFileChangeEventArgs e)
+    {
+        var tamanoMaximo = 5 * 1024 * 1024;
+        foreach (var archivo in e.GetMultipleFiles(10))
+        {
+            if (!archivo.ContentType.StartsWith("image/"))
+            {
+                toastService.ShowError("Solo se permiten archivos de imagen.");
+                continue;
+            }
+
+            if (archivo.Size > tamanoMaximo)
+            {
+                toastService.ShowError($"La imagen {archivo.Name} supera el tamaño máximo de 5 MB.");
+                continue;
+            }
+
+            using var stream = archivo.OpenReadStream(tamanoMaximo);
+            using var memoryStream = new MemoryStream();
+            await stream.CopyToAsync(memoryStream);
+
+            Levantamiento.FotosLevantamientos.Add(new FotosLevantamientos
+            {
+                LevantamientoId = Levantamiento.LevantamientoId,
+                NombreArchivo = archivo.Name,
+                TipoContenido = archivo.ContentType,
+                Contenido = memoryStream.ToArray()
+            });
+        }
+    }
+
+    private void RemoverFoto(FotosLevantamientos foto)
+    {
+        Levantamiento.FotosLevantamientos.Remove(foto);
     }
 }
