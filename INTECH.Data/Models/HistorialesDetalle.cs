@@ -12,4 +12,10 @@ public class HistorialesDetalle
 
     [Required(ErrorMessage = "Este Campo Es Requerido")]
     public string Titulo { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Este Campo Es Requerido")]
+    public string Descripcion { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Este Campo Es Requerido")]
+    public DateTime Fecha { get; set; } = DateTime.Now;
 }
