@@ -12,5 +12,38 @@
         <div class="card-header d-flex justify-content-between align-center mb-4">
             <h5 class="card-title">Registro de Órdenes de Trabajo</h5>
         </div>
+
+        <div class="card-body">
+            @* Filtro *@
+            <div class="row">
+                <div class="col-3">
+                    <label class="col-form-label"><strong>Filtrar por</strong></label>
+                </div>
+                <div class="col-4">
+                    <label class="col-form-label"><strong>Búsqueda</strong></label>
+                </div>
+            </div>
+
+            @* Controles de búsqueda *@
+            <div class="row align-items-center">
+                <div class="col-3">
+                    <InputSelect class="form-select" @bind-Value="Filtro">
+                        <option value="" selected disabled>Elija una opci&oacute;n</option>
+                        <option value="OrdenTrabajoId">OrdenTrabajoId</option>
+                        <option value="SolicitudId">SolicitudId</option>
+                        <option value="Cliente">Cliente</option>
+                        <option value="TipoServicio">Tipo de Servicio</option>
+                        <option value="Fecha">Fecha</option>
+                        <option value="Estado">Estado</option>
+                    </InputSelect>
+                </div>
+                <div class="col-4">
+                    <div class="input-group">
+                        <input class="form-control" @bind="ValorFiltro" placeholder="Buscar" />
+                        <button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"></button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
