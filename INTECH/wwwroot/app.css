@@ -191,6 +191,11 @@ html, body {
     transition: background-color 0.15s ease;
 }
 
+.tecnico-layout .fc-day-cell:hover,
+.tecnico-layout .fc-slot-cell:hover {
+    background-color: #f8f9fa !important;
+}
+
 @media (min-width: 768px) {
     .tecnico-sidebar {
         width: 250px;
