@@ -219,4 +219,104 @@
             await CargarOrdenesTrabajo();
         }
     }
+
+    private async Task Buscar()
+    {
+        var valor = ValorFiltro.Trim().ToLower();
+        if (Filtro == "Fecha")
+        {
+            if (Desde == null || Hasta == null)
+            {
+                toastService.ShowError("Seleccione las fechas desde y hasta.");
+                return;
+            }
+
+            if (Desde > Hasta)
+            {
+                toastService.ShowWarning("La fecha desde no puede ser mayor que la fecha hasta.");
+                return;
+            }
+
+            var ordenesPorFechaResult = await ordenesTrabajoService.GetList(o =>
+                o.Solicitud.FechaSolicitud >= Desde && o.Solicitud.FechaSolicitud <= Hasta);
+            ordenesPorFechaResult.OnSuccess(ordenes => ListaOrdenesTrabajo = ordenes);
+            ordenesPorFechaResult.OnFailure(() =>
+                toastService.ShowError("No se pudieron consultar las órdenes de trabajo."));
+        }
+        else if (Filtro == "Estado")
+        {
+            if (EstadoFiltroId == 0)
+            {
+                await CargarOrdenesTrabajo();
+                return;
+            }
+
+            var ordenesPorEstadoResult = await ordenesTrabajoService.GetList(o => o.Solicitud.EstadoSolicitudId == EstadoFiltroId);
+            ordenesPorEstadoResult.OnSuccess(ordenes => ListaOrdenesTrabajo = ordenes);
+            ordenesPorEstadoResult.OnFailure(() =>
+                toastService.ShowError("No se pudieron consultar las órdenes de trabajo."));
+        }
+        else if (Filtro == "TipoServicio")
+        {
+            if (TipoServicioFiltro != "")
+            {
+                var ordenesPorTipoResult = await ordenesTrabajoService.GetList(o => o.Solicitud.TipoServicio == TipoServicioFiltro);
+                ordenesPorTipoResult.OnSuccess(ordenes => ListaOrdenesTrabajo = ordenes);
+                ordenesPorTipoResult.OnFailure(() =>
+                    toastService.ShowError("No se pudieron consultar las órdenes de trabajo."));
+            }
+            else if (valor != "")
+            {
+                var ordenesPorTipoResult = await ordenesTrabajoService.GetList(o => o.Solicitud.TipoServicio.ToLower().Contains(valor));
+                ordenesPorTipoResult.OnSuccess(ordenes => ListaOrdenesTrabajo = ordenes);
+                ordenesPorTipoResult.OnFailure(() =>
+                    toastService.ShowError("No se pudieron consultar las órdenes de trabajo."));
+            }
+            else
+            {
+                await CargarOrdenesTrabajo();
+            }
+        }
+        else if (valor == "")
+        {
+            await CargarOrdenesTrabajo();
+        }
+        else if (Filtro == "OrdenTrabajoId")
+        {
+            if (!int.TryParse(valor, out var ordenTrabajoId))
+            {
+                toastService.ShowError("Ingrese un número de orden válido.");
+                return;
+            }
+
+            var ordenesPorIdResult = await ordenesTrabajoService.GetList(o => o.OrdenTrabajoId == ordenTrabajoId);
+            ordenesPorIdResult.OnSuccess(ordenes => ListaOrdenesTrabajo = ordenes);
+            ordenesPorIdResult.OnFailure(() =>
+                toastService.ShowError("No se pudieron consultar las órdenes de trabajo."));
+        }
+        else if (Filtro == "SolicitudId")
+        {
+            if (!int.TryParse(valor, out var solicitudId))
+            {
+                toastService.ShowError("Ingrese un número de solicitud válido.");
+                return;
+            }
+
+            var ordenesPorSolicitudResult = await ordenesTrabajoService.GetList(o => o.SolicitudId == solicitudId);
+            ordenesPorSolicitudResult.OnSuccess(ordenes => ListaOrdenesTrabajo = ordenes);
+            ordenesPorSolicitudResult.OnFailure(() =>
+                toastService.ShowError("No se pudieron consultar las órdenes de trabajo."));
+        }
+        else if (Filtro == "Cliente")
+        {
+            var ordenesPorClienteResult = await ordenesTrabajoService.GetList(o => o.Solicitud.Cliente.Nombre.ToLower().Contains(valor));
+            ordenesPorClienteResult.OnSuccess(ordenes => ListaOrdenesTrabajo = ordenes);
+            ordenesPorClienteResult.OnFailure(() =>
+                toastService.ShowError("No se pudieron consultar las órdenes de trabajo."));
+        }
+        else
+        {
+            toastService.ShowError("Seleccione un filtro.");
+        }
+    }
 }
