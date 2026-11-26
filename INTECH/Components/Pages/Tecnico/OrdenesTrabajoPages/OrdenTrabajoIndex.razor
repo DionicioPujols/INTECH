@@ -198,6 +198,12 @@
             return;
         }
 
+        if (solicitud.EstadoSolicitudId != 2)
+        {
+            toastService.ShowError("Solo se pueden marcar para cobro órdenes cuya solicitud está en proceso.");
+            return;
+        }
+
         solicitud.EstadoSolicitudId = 8;
         var guardadoResult = await solicitudesService.Guardar(solicitud);
         guardadoResult.OnSuccess(() => toastService.ShowSuccess("Orden marcada lista para cobro correctamente."));
@@ -210,6 +216,13 @@
 
     private async Task Eliminar()
     {
+        var orden = ListaOrdenesTrabajo.FirstOrDefault(o => o.OrdenTrabajoId == ordenTrabajoIdAEliminar);
+        if (orden != null && (orden.Solicitud.EstadoSolicitudId == 8 || orden.Solicitud.EstadoSolicitudId == 9))
+        {
+            toastService.ShowError("No se puede eliminar una orden de trabajo pendiente de cobro o finalizada.");
+            return;
+        }
+
         var result = await ordenesTrabajoService.Eliminar(ordenTrabajoIdAEliminar);
         result.OnSuccess(() => toastService.ShowSuccess("Orden de trabajo eliminada correctamente."));
         result.OnFailure(() => toastService.ShowError("No se pudo eliminar la orden de trabajo."));
