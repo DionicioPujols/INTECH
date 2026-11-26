@@ -127,7 +127,7 @@
 
     private async Task CargarHistoriales()
     {
-        var historialesResult = await historialesService.GetList(h => true);
+        var historialesResult = await historialesService.GetList(h => h.Solicitud.EstadoSolicitudId == 9);
         historialesResult.OnSuccess(historiales => ListaHistoriales = historiales);
         historialesResult.OnFailure(() => toastService.ShowError("No se pudieron consultar los historiales."));
     }
@@ -186,7 +186,7 @@
             }
 
             var historialesPorFechaResult = await historialesService.GetList(h =>
-                h.FechaFinalizacion >= Desde && h.FechaFinalizacion <= Hasta);
+                h.Solicitud.EstadoSolicitudId == 9 && h.FechaFinalizacion >= Desde && h.FechaFinalizacion <= Hasta);
             historialesPorFechaResult.OnSuccess(historiales => ListaHistoriales = historiales);
             historialesPorFechaResult.OnFailure(() =>
                 toastService.ShowError("No se pudieron consultar los historiales."));
@@ -195,14 +195,16 @@
         {
             if (TipoServicioFiltro != "")
             {
-                var historialesPorTipoResult = await historialesService.GetList(h => h.Solicitud.TipoServicio == TipoServicioFiltro);
+                var historialesPorTipoResult = await historialesService.GetList(h =>
+                    h.Solicitud.EstadoSolicitudId == 9 && h.Solicitud.TipoServicio == TipoServicioFiltro);
                 historialesPorTipoResult.OnSuccess(historiales => ListaHistoriales = historiales);
                 historialesPorTipoResult.OnFailure(() =>
                     toastService.ShowError("No se pudieron consultar los historiales."));
             }
             else if (valor != "")
             {
-                var historialesPorTipoResult = await historialesService.GetList(h => h.Solicitud.TipoServicio.ToLower().Contains(valor));
+                var historialesPorTipoResult = await historialesService.GetList(h =>
+                    h.Solicitud.EstadoSolicitudId == 9 && h.Solicitud.TipoServicio.ToLower().Contains(valor));
                 historialesPorTipoResult.OnSuccess(historiales => ListaHistoriales = historiales);
                 historialesPorTipoResult.OnFailure(() =>
                     toastService.ShowError("No se pudieron consultar los historiales."));
@@ -221,14 +223,16 @@
             }
             else if (TecnicoFiltroId == "SIN_ASIGNAR")
             {
-                var historialesSinTecnicoResult = await historialesService.GetList(h => string.IsNullOrEmpty(h.TecnicoId));
+                var historialesSinTecnicoResult = await historialesService.GetList(h =>
+                    h.Solicitud.EstadoSolicitudId == 9 && string.IsNullOrEmpty(h.TecnicoId));
                 historialesSinTecnicoResult.OnSuccess(historiales => ListaHistoriales = historiales);
                 historialesSinTecnicoResult.OnFailure(() =>
                     toastService.ShowError("No se pudieron consultar los historiales."));
                 return;
             }
 
-            var historialesPorTecnicoResult = await historialesService.GetList(h => h.TecnicoId == TecnicoFiltroId);
+            var historialesPorTecnicoResult = await historialesService.GetList(h =>
+                h.Solicitud.EstadoSolicitudId == 9 && h.TecnicoId == TecnicoFiltroId);
             historialesPorTecnicoResult.OnSuccess(historiales => ListaHistoriales = historiales);
             historialesPorTecnicoResult.OnFailure(() =>
                 toastService.ShowError("No se pudieron consultar los historiales."));
@@ -245,7 +249,8 @@
                 return;
             }
 
-            var historialesPorIdResult = await historialesService.GetList(h => h.HistorialId == historialId);
+            var historialesPorIdResult = await historialesService.GetList(h =>
+                h.Solicitud.EstadoSolicitudId == 9 && h.HistorialId == historialId);
             historialesPorIdResult.OnSuccess(historiales => ListaHistoriales = historiales);
             historialesPorIdResult.OnFailure(() =>
                 toastService.ShowError("No se pudieron consultar los historiales."));
@@ -258,14 +263,16 @@
                 return;
             }
 
-            var historialesPorSolicitudResult = await historialesService.GetList(h => h.SolicitudId == solicitudId);
+            var historialesPorSolicitudResult = await historialesService.GetList(h =>
+                h.Solicitud.EstadoSolicitudId == 9 && h.SolicitudId == solicitudId);
             historialesPorSolicitudResult.OnSuccess(historiales => ListaHistoriales = historiales);
             historialesPorSolicitudResult.OnFailure(() =>
                 toastService.ShowError("No se pudieron consultar los historiales."));
         }
         else if (Filtro == "Cliente")
         {
-            var historialesPorClienteResult = await historialesService.GetList(h => h.Solicitud.Cliente.Nombre.ToLower().Contains(valor));
+            var historialesPorClienteResult = await historialesService.GetList(h =>
+                h.Solicitud.EstadoSolicitudId == 9 && h.Solicitud.Cliente.Nombre.ToLower().Contains(valor));
             historialesPorClienteResult.OnSuccess(historiales => ListaHistoriales = historiales);
             historialesPorClienteResult.OnFailure(() =>
                 toastService.ShowError("No se pudieron consultar los historiales."));
