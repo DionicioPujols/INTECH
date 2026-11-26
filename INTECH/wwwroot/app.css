@@ -181,6 +181,42 @@ html, body {
     --bs-btn-active-border-color: #c5242a;
 }
 
+.tecnico-layout .fc-grid-7 {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.tecnico-layout .fc-day-cell {
+    min-height: 115px;
+    transition: background-color 0.15s ease;
+}
+
+.tecnico-layout .fc-day-cell:hover,
+.tecnico-layout .fc-slot-cell:hover {
+    background-color: #f8f9fa !important;
+}
+
+.tecnico-layout .fc-slot-cell {
+    height: 44px;
+}
+
+.tecnico-layout .fc-event-item {
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+}
+
+.tecnico-layout .fc-event-item:hover {
+    opacity: 0.85;
+}
+
+.tecnico-layout .fc-col-hora {
+    width: 75px;
+}
+
+.tecnico-layout .fc-more-label {
+    font-size: 0.7rem;
+}
+
 @media (min-width: 768px) {
     .tecnico-sidebar {
         width: 250px;

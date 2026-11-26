@@ -1,17 +1,430 @@
 @page "/Agenda/Index"
 @attribute [Authorize(Roles = "Técnico")]
 
-<PageTitle>Agenda | INTECH</PageTitle>
+@inject AgendasService agendasService
+@inject Microsoft.AspNetCore.Identity.UserManager<INTECH.Data.ApplicationUser> userManager
+@inject ToastService toastService
 
+<PageTitle>Agenda</PageTitle>
 <div class="container-fluid p-0">
-    <div class="card">
-        <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-3">
-            <h1 class="h4 fw-normal mb-0">Agenda</h1>
-            <a href="/Agenda/Create" class="btn btn-primary d-flex align-items-center gap-2"><span class="bi bi-plus-square" aria-hidden="true"></span> Crear visita</a>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h3 class="fw-bold mb-0">Agenda</h3>
+            <p class="text-body-secondary mb-0">Visitas programadas y su ubicación.</p>
         </div>
-        <div class="card-body py-5">
-            <p class="text-body-secondary mb-0">No hay visitas programadas.</p>
+        <a href="/Agenda/Create" class="btn btn-primary"> <span class="bi bi-plus-square"></span> Nueva visita</a>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-12 col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    @* Filtros *@
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                        <div>
+                            <InputSelect class="form-select" @bind-Value="VistaActual">
+                                <option value="@VistaAgenda.Hoy">Hoy</option>
+                                <option value="@VistaAgenda.Semanal">Semanal</option>
+                                <option value="@VistaAgenda.Mensual">Mensual</option>
+                            </InputSelect>
+                        </div>
+                        <div>
+                            <input class="form-control" @bind="SolicitudIdFiltro" placeholder="ID de solicitud" />
+                        </div>
+                        <div>
+                            <InputSelect class="form-select" @bind-Value="TecnicoFiltroId">
+                                <option value="">Todos los técnicos</option>
+                                <option value="SIN_ASIGNAR">Sin asignar</option>
+                                @foreach (var tecnico in ListaTecnicos)
+                                {
+                                    <option value="@tecnico.Id">@tecnico.UserName</option>
+                                }
+                            </InputSelect>
+                        </div>
+                        <button type="button" class="btn btn-primary" @onclick="Buscar">Buscar</button>
+                    </div>
+
+                    @* Navegación del periodo *@
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="Anterior">
+                            <span class="bi bi-chevron-left"></span>
+                        </button>
+                        <span class="fw-medium text-capitalize">@TituloPeriodo</span>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="Siguiente">
+                            <span class="bi bi-chevron-right"></span>
+                        </button>
+                        <button type="button" class="btn btn-outline-primary btn-sm ms-auto" @onclick="IrAHoy">Hoy</button>
+                    </div>
+
+                    @* Calendario *@
+                    @if (VistaActual == VistaAgenda.Hoy)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0 align-middle">
+                                <tbody>
+                                    @for (int hora = 8; hora <= 18; hora++)
+                                    {
+                                        var horaActual = hora;
+                                        var visitasHora = ListaAgendas
+                                            .Where(a => a.Fecha.Date == FechaReferencia.Date && a.HoraInicio.Hour == horaActual)
+                                            .OrderBy(a => a.HoraInicio)
+                                            .ToList();
+
+                                        <tr>
+                                            <td class="text-body-secondary small fc-col-hora">@($"{(horaActual > 12 ? horaActual - 12 : horaActual):00} {(horaActual >= 12 ? "PM" : "AM")}")</td>
+                                            <td class="fc-slot-cell">
+                                                <div class="d-flex flex-column gap-1">
+                                                    @foreach (var visita in visitasHora)
+                                                    {
+                                                        <div class="badge bg-primary text-start fw-normal py-2 px-2 fc-event-item"
+                                                             @onclick="() => SeleccionarVisita(visita)">
+                                                            <span class="fw-bold">@visita.HoraInicio.ToString("hh:mm tt") - @visita.HoraFin.ToString("hh:mm tt")</span>
+                                                            | Solicitud #@visita.SolicitudId - @visita.Solicitud.Cliente.Nombre (@visita.Solicitud.Direccion)
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else if (VistaActual == VistaAgenda.Semanal)
+                    {
+                        var diasSemana = ObtenerDiasSemana();
+
+                        <div class="table-responsive">
+                            <table class="table table-bordered mb-0 align-middle">
+                                <thead class="table-light text-center">
+                                    <tr>
+                                        <th class="fc-col-hora">Hora</th>
+                                        @foreach (var dia in diasSemana)
+                                        {
+                                            var esHoy = dia.Date == DateTime.Today;
+                                            <th class="@(esHoy ? "table-primary" : "")">
+                                                <div class="small text-uppercase text-muted">@dia.ToString("ddd", Cultura)</div>
+                                                <div class="fs-6">@dia.Day</div>
+                                            </th>
+                                        }
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (int hora = 8; hora <= 18; hora++)
+                                    {
+                                        var horaActual = hora;
+                                        <tr>
+                                            <td class="text-center text-muted small bg-light">@($"{horaActual:00}:00")</td>
+                                            @foreach (var dia in diasSemana)
+                                            {
+                                                var visitasHora = ListaAgendas
+                                                    .Where(a => a.Fecha.Date == dia.Date && a.HoraInicio.Hour == horaActual)
+                                                    .OrderBy(a => a.HoraInicio)
+                                                    .ToList();
+
+                                                <td class="p-1 fc-slot-cell">
+                                                    @foreach (var visita in visitasHora)
+                                                    {
+                                                        <div class="badge bg-primary d-block text-start text-truncate mb-1 p-1 fc-event-item"
+                                                             @onclick="() => SeleccionarVisita(visita)">
+                                                            @visita.HoraInicio.ToString("HH:mm") - #@visita.SolicitudId @visita.Solicitud.Cliente.Nombre
+                                                        </div>
+                                                    }
+                                                </td>
+                                            }
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="fc-grid-7 bg-light border-top border-bottom text-center fw-semibold text-muted small py-2">
+                            @foreach (var diaNombre in NombresDias)
+                            {
+                                <div>@diaNombre</div>
+                            }
+                        </div>
+
+                        <div class="fc-grid-7 border-start">
+                            @foreach (var fecha in ObtenerDiasMes())
+                            {
+                                var esMesActual = fecha.Month == FechaReferencia.Month;
+                                var esHoy = fecha.Date == DateTime.Today;
+                                var visitasDia = ListaAgendas
+                                    .Where(a => a.Fecha.Date == fecha.Date)
+                                    .OrderBy(a => a.HoraInicio)
+                                    .ToList();
+
+                                <div class="fc-day-cell border-end border-bottom p-2 @(esMesActual ? "bg-white" : "bg-light text-muted")">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="badge rounded-pill @(esHoy ? "bg-primary" : "text-dark fw-normal")">
+                                            @fecha.Day
+                                        </span>
+                                        @if (visitasDia.Count > 3)
+                                        {
+                                            <small class="text-muted fc-more-label">+@((visitasDia.Count - 3)) más</small>
+                                        }
+                                    </div>
+
+                                    <div class="d-flex flex-column gap-1">
+                                        @foreach (var visita in visitasDia.Take(3))
+                                        {
+                                            <div class="badge bg-primary text-start text-truncate fw-normal py-1 px-2 fc-event-item"
+                                                 @onclick="() => SeleccionarVisita(visita)">
+                                                <span class="fw-bold">@visita.HoraInicio.ToString("HH:mm")</span> #@visita.SolicitudId @visita.Solicitud.Cliente.Nombre
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
         </div>
-        <div class="card-footer">Cantidad: 0</div>
+
+        @* Panel de detalle de la visita seleccionada *@
+        <div class="col-12 col-lg-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    @if (VisitaSeleccionada == null)
+                    {
+                        <p class="text-body-secondary text-center mb-0 py-4">Selecciona una visita del calendario para ver su detalle.</p>
+                    }
+                    else
+                    {
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="card-title mb-0">Solicitud #@VisitaSeleccionada.SolicitudId</h5>
+                            <span class="badge @ObtenerColorEstado(VisitaSeleccionada.Solicitud.EstadoSolicitudId)">
+                                @VisitaSeleccionada.Solicitud.EstadoSolicitud.Nombre
+                            </span>
+                        </div>
+
+                        <div class="mb-2">
+                            <small class="text-body-secondary d-block">Cliente</small>
+                            <strong>@VisitaSeleccionada.Solicitud.Cliente.Nombre</strong>
+                        </div>
+                        <div class="mb-2">
+                            <small class="text-body-secondary d-block">Tipo de servicio</small>
+                            <span>@VisitaSeleccionada.Solicitud.TipoServicio</span>
+                        </div>
+                        <div class="mb-2">
+                            <small class="text-body-secondary d-block">Dirección</small>
+                            <span>@VisitaSeleccionada.Solicitud.Direccion</span>
+                        </div>
+                        <div class="mb-2">
+                            <small class="text-body-secondary d-block">Fecha</small>
+                            <span>@VisitaSeleccionada.Fecha.ToString("dd/MM/yyyy")</span>
+                        </div>
+                        <div class="mb-2">
+                            <small class="text-body-secondary d-block">Horario</small>
+                            <span>@VisitaSeleccionada.HoraInicio.ToString("hh:mm tt") - @VisitaSeleccionada.HoraFin.ToString("hh:mm tt")</span>
+                        </div>
+                        <div class="mb-3">
+                            <small class="text-body-secondary d-block">Técnico asignado</small>
+                            <span>@ObtenerNombreTecnico(VisitaSeleccionada.TecnicoId)</span>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <a href="/Agenda/Edit/@VisitaSeleccionada.AgendaId" class="btn btn-outline-primary bi bi-pencil-square flex-grow-1"> Editar</a>
+                            <button type="button" class="btn btn-outline-danger bi bi-trash flex-grow-1"
+                                    data-bs-toggle="modal" data-bs-target="#modalEliminarAgenda"
+                                    @onclick="() => agendaIdAEliminar = VisitaSeleccionada.AgendaId"> Eliminar</button>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+@* Modal de eliminación *@
+<div class="modal fade" id="modalEliminarAgenda" tabindex="-1" aria-labelledby="modalEliminarAgendaLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="modalEliminarAgendaLabel">Eliminar Visita</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        ¿Estás seguro de que deseas eliminar esta visita de la agenda?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal" @onclick="Eliminar">Sí, eliminar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+@code {
+    public enum VistaAgenda
+    {
+        Hoy,
+        Semanal,
+        Mensual
+    }
+
+    private readonly System.Globalization.CultureInfo Cultura = new("es-ES");
+    private readonly string[] NombresDias = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+
+    public List<Agendas> ListaAgendas { get; set; } = new List<Agendas>();
+    public List<INTECH.Data.ApplicationUser> ListaTecnicos { get; set; } = new List<INTECH.Data.ApplicationUser>();
+    public Agendas? VisitaSeleccionada { get; set; }
+    public VistaAgenda VistaActual { get; set; } = VistaAgenda.Hoy;
+    public DateTime FechaReferencia { get; set; } = DateTime.Today;
+    public string SolicitudIdFiltro { get; set; } = string.Empty;
+    public string TecnicoFiltroId { get; set; } = string.Empty;
+    private int agendaIdAEliminar;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var tecnicos = await userManager.GetUsersInRoleAsync("Técnico");
+        ListaTecnicos = tecnicos.ToList();
+
+        await CargarAgendas();
+    }
+
+    private async Task CargarAgendas()
+    {
+        var agendasResult = await agendasService.GetList(a => true);
+        agendasResult.OnSuccess(agendas => ListaAgendas = agendas);
+        agendasResult.OnFailure(() => toastService.ShowError("No se pudieron consultar las visitas."));
+    }
+
+    private string TituloPeriodo => VistaActual switch
+    {
+        VistaAgenda.Hoy => FechaReferencia.ToString("dddd, dd 'de' MMMM 'de' yyyy", Cultura),
+        VistaAgenda.Semanal => $"{ObtenerDiasSemana().First().ToString("dd MMM", Cultura)} - {ObtenerDiasSemana().Last().ToString("dd MMM yyyy", Cultura)}",
+        _ => FechaReferencia.ToString("MMMM yyyy", Cultura)
+    };
+
+    private void Anterior()
+    {
+        FechaReferencia = VistaActual switch
+        {
+            VistaAgenda.Hoy => FechaReferencia.AddDays(-1),
+            VistaAgenda.Semanal => FechaReferencia.AddDays(-7),
+            _ => FechaReferencia.AddMonths(-1)
+        };
+    }
+
+    private void Siguiente()
+    {
+        FechaReferencia = VistaActual switch
+        {
+            VistaAgenda.Hoy => FechaReferencia.AddDays(1),
+            VistaAgenda.Semanal => FechaReferencia.AddDays(7),
+            _ => FechaReferencia.AddMonths(1)
+        };
+    }
+
+    private void IrAHoy()
+    {
+        FechaReferencia = DateTime.Today;
+    }
+
+    private List<DateTime> ObtenerDiasMes()
+    {
+        var primerDiaMes = new DateTime(FechaReferencia.Year, FechaReferencia.Month, 1);
+        int desplazamiento = ((int)primerDiaMes.DayOfWeek + 6) % 7;
+        var inicioCuadricula = primerDiaMes.AddDays(-desplazamiento);
+
+        return Enumerable.Range(0, 42)
+            .Select(i => inicioCuadricula.AddDays(i))
+            .ToList();
+    }
+
+    private List<DateTime> ObtenerDiasSemana()
+    {
+        int desplazamiento = ((int)FechaReferencia.DayOfWeek + 6) % 7;
+        var lunes = FechaReferencia.AddDays(-desplazamiento);
+        return Enumerable.Range(0, 7).Select(i => lunes.AddDays(i)).ToList();
+    }
+
+    private void SeleccionarVisita(Agendas visita)
+    {
+        VisitaSeleccionada = visita;
+    }
+
+    private string ObtenerNombreTecnico(string? tecnicoId)
+    {
+        if (string.IsNullOrWhiteSpace(tecnicoId))
+        {
+            return "Sin asignar";
+        }
+
+        return ListaTecnicos.FirstOrDefault(t => t.Id == tecnicoId)?.UserName ?? "Sin asignar";
+    }
+
+    private string ObtenerColorEstado(int estadoSolicitudId)
+    {
+        if (estadoSolicitudId == 1)
+        {
+            return "bg-warning-subtle text-warning-emphasis";
+        }
+        else if (estadoSolicitudId == 2)
+        {
+            return "bg-primary-subtle text-primary-emphasis";
+        }
+        else if (estadoSolicitudId == 3)
+        {
+            return "bg-primary bg-opacity-10 text-primary";
+        }
+        else if (estadoSolicitudId == 5)
+        {
+            return "bg-warning-subtle text-danger-emphasis";
+        }
+        else if (estadoSolicitudId == 9)
+        {
+            return "bg-success-subtle text-success-emphasis";
+        }
+
+        return "bg-danger-subtle text-danger-emphasis";
+    }
+
+    private async Task Buscar()
+    {
+        var valor = SolicitudIdFiltro.Trim();
+        int? solicitudId = null;
+        if (valor != "")
+        {
+            if (!int.TryParse(valor, out var id))
+            {
+                toastService.ShowError("Ingrese un número de solicitud válido.");
+                return;
+            }
+            solicitudId = id;
+        }
+
+        var agendasResult = await agendasService.GetList(a =>
+            (solicitudId == null || a.SolicitudId == solicitudId) &&
+            (TecnicoFiltroId == "" ||
+                (TecnicoFiltroId == "SIN_ASIGNAR" ? string.IsNullOrEmpty(a.TecnicoId) : a.TecnicoId == TecnicoFiltroId)));
+
+        agendasResult.OnSuccess(agendas =>
+        {
+            ListaAgendas = agendas;
+            if (VisitaSeleccionada != null)
+            {
+                VisitaSeleccionada = ListaAgendas.FirstOrDefault(a => a.AgendaId == VisitaSeleccionada.AgendaId);
+            }
+        });
+        agendasResult.OnFailure(() => toastService.ShowError("No se pudieron consultar las visitas."));
+    }
+
+    private async Task Eliminar()
+    {
+        var result = await agendasService.Eliminar(agendaIdAEliminar);
+        result.OnSuccess(() => toastService.ShowSuccess("Visita eliminada correctamente."));
+        result.OnFailure(() => toastService.ShowError("No se pudo eliminar la visita."));
+
+        if (result.IsSuccess)
+        {
+            VisitaSeleccionada = null;
+            await Buscar();
+        }
+    }
+}

@@ -1,0 +1,169 @@
+@page "/Agenda/Edit/{AgendaId:int}"
+@attribute [Authorize(Roles = "Técnico")]
+
+@inject AgendasService agendasService
+@inject SolicitudesService solicitudesService
+@inject Microsoft.AspNetCore.Identity.UserManager<INTECH.Data.ApplicationUser> userManager
+@inject NavigationManager navigationManager
+@inject ToastService toastService
+
+<PageTitle>Modificar Visita</PageTitle>
+<EditForm Model="Agenda" OnValidSubmit="Modificar">
+    <DataAnnotationsValidator />
+
+    <div class="container">
+        <div class="card shadow-lg">
+            <div class="card-header text-center">
+                <h5 class="card-title">Modificar Visita</h5>
+            </div>
+
+            <div class="card-body">
+
+                @* Solicitud *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Solicitud *</strong></label>
+                    <InputSelect class="form-control form-select" @bind-Value="Agenda.SolicitudId" @bind-Value:after="CargarDireccion">
+                        <option value="0" disabled>Seleccionar solicitud...</option>
+                        @foreach (var solicitud in ListaSolicitudes)
+                        {
+                            <option value="@solicitud.SolicitudId">Solicitud #@solicitud.SolicitudId - @solicitud.Cliente.Nombre (@solicitud.TipoServicio)</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="(() => Agenda.SolicitudId)" />
+                </div>
+
+                @* Técnico Asignado *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Técnico asignado</strong></label>
+                    <InputSelect class="form-control form-select" @bind-Value="Agenda.TecnicoId">
+                        <option value="">Sin asignar</option>
+                        @foreach (var tecnico in ListaTecnicos)
+                        {
+                            <option value="@tecnico.Id">@tecnico.UserName</option>
+                        }
+                    </InputSelect>
+                </div>
+
+                @* Dirección *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Dirección</strong></label>
+                    <input class="form-control" value="@DireccionSeleccionada" disabled />
+                </div>
+
+                @* Fecha *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Fecha *</strong></label>
+                    <InputDate class="form-control" @bind-Value="Agenda.Fecha"></InputDate>
+                    <ValidationMessage For="(() => Agenda.Fecha)" />
+                </div>
+
+                @* Hora de Inicio *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Hora de inicio *</strong></label>
+                    <InputDate Type="InputDateType.Time" class="form-control" @bind-Value="Agenda.HoraInicio"></InputDate>
+                    <ValidationMessage For="(() => Agenda.HoraInicio)" />
+                </div>
+
+                @* Hora de Fin *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Hora de fin *</strong></label>
+                    <InputDate Type="InputDateType.Time" class="form-control" @bind-Value="Agenda.HoraFin"></InputDate>
+                    <ValidationMessage For="(() => Agenda.HoraFin)" />
+                </div>
+
+            </div>
+
+            @* Botones de Acción *@
+            <div class="card-footer text-center mt-2">
+                <a href="/Agenda/Index" class="btn btn-secondary">
+                    <span class="bi bi-arrow-left"></span> Volver
+                </a>
+                <button type="submit" class="btn btn-primary bi bi-floppy"> Modificar</button>
+                <button type="button" class="btn btn-danger bi bi-trash" data-bs-toggle="modal" data-bs-target="#modalEliminarAgenda"> Eliminar</button>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@* Modal de eliminación *@
+<div class="modal fade" id="modalEliminarAgenda" tabindex="-1" aria-labelledby="modalEliminarAgendaLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="modalEliminarAgendaLabel">Eliminar Visita</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        ¿Estás seguro de que deseas eliminar esta visita de la agenda?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal" @onclick="Eliminar">Sí, eliminar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+@code {
+    [Parameter]
+    public int AgendaId { get; set; }
+
+    public Agendas Agenda { get; set; } = new Agendas();
+    public List<Solicitudes> ListaSolicitudes { get; set; } = new List<Solicitudes>();
+    public List<INTECH.Data.ApplicationUser> ListaTecnicos { get; set; } = new List<INTECH.Data.ApplicationUser>();
+    private string DireccionSeleccionada { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await agendasService.Buscar(AgendaId);
+        result.OnSuccess(agenda => Agenda = agenda ?? new Agendas());
+
+        var solicitudesResult = await solicitudesService.GetList(s => true);
+        solicitudesResult.OnSuccess(solicitudes => ListaSolicitudes = solicitudes);
+        solicitudesResult.OnFailure(() => toastService.ShowError("No se pudieron consultar las solicitudes."));
+
+        var tecnicos = await userManager.GetUsersInRoleAsync("Técnico");
+        ListaTecnicos = tecnicos.ToList();
+
+        CargarDireccion();
+    }
+
+    private void CargarDireccion()
+    {
+        var solicitud = ListaSolicitudes.FirstOrDefault(s => s.SolicitudId == Agenda.SolicitudId);
+        DireccionSeleccionada = solicitud?.Direccion ?? Agenda.Solicitud?.Direccion ?? string.Empty;
+    }
+
+    public async Task Modificar()
+    {
+        if (Agenda.HoraFin <= Agenda.HoraInicio)
+        {
+            toastService.ShowError("La hora de fin debe ser mayor que la hora de inicio.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(Agenda.TecnicoId))
+        {
+            Agenda.TecnicoId = null;
+        }
+
+        var result = await agendasService.Guardar(Agenda);
+        result.OnSuccess(() =>
+        {
+            toastService.ShowSuccess("Visita modificada correctamente.");
+            navigationManager.NavigateTo("/Agenda/Index");
+        });
+        result.OnFailure(() => toastService.ShowError("No se pudo modificar la visita."));
+    }
+
+    private async Task Eliminar()
+    {
+        var result = await agendasService.Eliminar(AgendaId);
+        result.OnSuccess(() =>
+        {
+            toastService.ShowSuccess("Visita eliminada correctamente.");
+            navigationManager.NavigateTo("/Agenda/Index");
+        });
+        result.OnFailure(() => toastService.ShowError("No se pudo eliminar la visita."));
+    }
+}
