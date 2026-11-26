@@ -191,6 +191,15 @@
                     {
                         <p class="text-body-secondary text-center mb-0 py-4">Selecciona una visita del calendario para ver su detalle.</p>
                     }
+                    else
+                    {
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="card-title mb-0">Solicitud #@VisitaSeleccionada.SolicitudId</h5>
+                            <span class="badge @ObtenerColorEstado(VisitaSeleccionada.Solicitud.EstadoSolicitudId)">
+                                @VisitaSeleccionada.Solicitud.EstadoSolicitud.Nombre
+                            </span>
+                        </div>
+                    }
                 </div>
             </div>
         </div>
