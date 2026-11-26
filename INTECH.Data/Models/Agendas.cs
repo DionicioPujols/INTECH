@@ -17,4 +17,10 @@ public class Agendas
 
     [Required(ErrorMessage = "Este Campo Es Requerido")]
     public DateTime Fecha { get; set; } = DateTime.Today;
+
+    [Required(ErrorMessage = "Este Campo Es Requerido")]
+    public TimeOnly HoraInicio { get; set; } = new TimeOnly(8, 0);
+
+    [Required(ErrorMessage = "Este Campo Es Requerido")]
+    public TimeOnly HoraFin { get; set; } = new TimeOnly(9, 0);
 }
