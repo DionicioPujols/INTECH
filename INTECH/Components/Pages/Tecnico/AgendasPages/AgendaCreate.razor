@@ -98,5 +98,22 @@
 
         var tecnicos = await userManager.GetUsersInRoleAsync("Técnico");
         ListaTecnicos = tecnicos.ToList();
+
+        if (AuthStateTask != null)
+        {
+            var authState = await AuthStateTask;
+            var usuarioActual = authState.User.Identity?.Name;
+            var tecnicoActual = ListaTecnicos.FirstOrDefault(t => t.UserName == usuarioActual);
+            if (tecnicoActual != null)
+            {
+                Agenda.TecnicoId = tecnicoActual.Id;
+            }
+        }
+    }
+
+    private void CargarDireccion()
+    {
+        var solicitud = ListaSolicitudes.FirstOrDefault(s => s.SolicitudId == Agenda.SolicitudId);
+        DireccionSeleccionada = solicitud?.Direccion ?? string.Empty;
     }
 }
