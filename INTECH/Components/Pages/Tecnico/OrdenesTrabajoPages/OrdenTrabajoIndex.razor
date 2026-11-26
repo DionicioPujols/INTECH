@@ -186,4 +186,37 @@
 
         return "bg-danger-subtle text-danger-emphasis";
     }
+
+    private async Task MarcarListaParaCobro(OrdenesTrabajo ordenTrabajo)
+    {
+        Solicitudes? solicitud = null;
+        var solicitudResult = await solicitudesService.Buscar(ordenTrabajo.SolicitudId);
+        solicitudResult.OnSuccess(s => solicitud = s);
+        if (solicitudResult.IsFailure || solicitud == null)
+        {
+            toastService.ShowError("No se pudo consultar la solicitud de la orden.");
+            return;
+        }
+
+        solicitud.EstadoSolicitudId = 8;
+        var guardadoResult = await solicitudesService.Guardar(solicitud);
+        guardadoResult.OnSuccess(() => toastService.ShowSuccess("Orden marcada lista para cobro correctamente."));
+        guardadoResult.OnFailure(() => toastService.ShowError("No se pudo actualizar el estado de la orden."));
+        if (guardadoResult.IsSuccess)
+        {
+            await CargarOrdenesTrabajo();
+        }
+    }
+
+    private async Task Eliminar()
+    {
+        var result = await ordenesTrabajoService.Eliminar(ordenTrabajoIdAEliminar);
+        result.OnSuccess(() => toastService.ShowSuccess("Orden de trabajo eliminada correctamente."));
+        result.OnFailure(() => toastService.ShowError("No se pudo eliminar la orden de trabajo."));
+
+        if (result.IsSuccess)
+        {
+            await CargarOrdenesTrabajo();
+        }
+    }
 }
