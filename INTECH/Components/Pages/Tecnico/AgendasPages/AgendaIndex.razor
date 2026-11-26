@@ -31,6 +31,17 @@
                         <div>
                             <input class="form-control" @bind="SolicitudIdFiltro" placeholder="ID de solicitud" />
                         </div>
+                        <div>
+                            <InputSelect class="form-select" @bind-Value="TecnicoFiltroId">
+                                <option value="">Todos los técnicos</option>
+                                <option value="SIN_ASIGNAR">Sin asignar</option>
+                                @foreach (var tecnico in ListaTecnicos)
+                                {
+                                    <option value="@tecnico.Id">@tecnico.UserName</option>
+                                }
+                            </InputSelect>
+                        </div>
+                        <button type="button" class="btn btn-primary" @onclick="Buscar">Buscar</button>
                     </div>
                 </div>
             </div>
