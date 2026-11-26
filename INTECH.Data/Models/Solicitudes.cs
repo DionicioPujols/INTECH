@@ -37,4 +37,7 @@ public class Solicitudes
 
     [InverseProperty("Solicitud")]
     public virtual ICollection<Levantamientos> Levantamientos { get; set; } = new List<Levantamientos>();
+
+    [InverseProperty("Solicitud")]
+    public virtual ICollection<Agendas> Agendas { get; set; } = new List<Agendas>();
 }
