@@ -115,4 +115,15 @@
         });
         result.OnFailure(() => toastService.ShowError("No se pudo modificar la orden de trabajo."));
     }
+
+    private async Task Eliminar()
+    {
+        var result = await ordenesTrabajoService.Eliminar(OrdenTrabajoId);
+        result.OnSuccess(() =>
+        {
+            toastService.ShowSuccess("Orden de trabajo eliminada correctamente.");
+            navigationManager.NavigateTo("/OrdenTrabajo/Index");
+        });
+        result.OnFailure(() => toastService.ShowError("No se pudo eliminar la orden de trabajo."));
+    }
 }
