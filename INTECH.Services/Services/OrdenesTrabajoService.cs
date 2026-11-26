@@ -56,4 +56,29 @@ public class OrdenesTrabajoService(
 
         return await contexto.SaveChangesAsync() > 0;
     }
+
+    public async Task<Result<OrdenesTrabajo?>> Buscar(int ordenTrabajoId)
+    {
+        await using var contexto = await contextFactory.CreateDbContextAsync();
+        return await contexto.OrdenesTrabajo
+            .Include(o => o.Solicitud)
+                .ThenInclude(s => s.Cliente)
+            .Include(o => o.Solicitud)
+                .ThenInclude(s => s.EstadoSolicitud)
+            .FirstOrDefaultAsync(o => o.OrdenTrabajoId == ordenTrabajoId && !o.IsDeleted);
+    }
+
+    public async Task<Result<List<OrdenesTrabajo>>> GetList(Expression<Func<OrdenesTrabajo, bool>> criterio)
+    {
+        await using var contexto = await contextFactory.CreateDbContextAsync();
+        return await contexto.OrdenesTrabajo
+            .Include(o => o.Solicitud)
+                .ThenInclude(s => s.Cliente)
+            .Include(o => o.Solicitud)
+                .ThenInclude(s => s.EstadoSolicitud)
+            .Where(o => !o.IsDeleted)
+            .Where(criterio)
+            .AsNoTracking()
+            .ToListAsync();
+    }
 }
