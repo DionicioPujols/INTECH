@@ -10,4 +10,18 @@ public class AgendasService(
     IDbContextFactory<Contexto> contextFactory
     )
 {
+
+    public async Task<Result> Guardar(Agendas agenda)
+    {
+        if (!await Existe(agenda.AgendaId))
+        {
+            var inserto = await Insertar(agenda);
+            return Result.Success(inserto);
+        }
+        else
+        {
+            var modifico = await Modificar(agenda);
+            return Result.Success(modifico);
+        }
+    }
 }
