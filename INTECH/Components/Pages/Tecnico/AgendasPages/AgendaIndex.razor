@@ -55,6 +55,7 @@
                         </button>
                         <button type="button" class="btn btn-outline-primary btn-sm ms-auto" @onclick="IrAHoy">Hoy</button>
                     </div>
+
                     @* Calendario *@
                     @if (VistaActual == VistaAgenda.Hoy)
                     {
@@ -183,6 +184,7 @@
                 </div>
             </div>
         </div>
+
         @* Panel de detalle de la visita seleccionada *@
         <div class="col-12 col-lg-4">
             <div class="card shadow-sm border-0">
@@ -411,5 +413,18 @@
             }
         });
         agendasResult.OnFailure(() => toastService.ShowError("No se pudieron consultar las visitas."));
+    }
+
+    private async Task Eliminar()
+    {
+        var result = await agendasService.Eliminar(agendaIdAEliminar);
+        result.OnSuccess(() => toastService.ShowSuccess("Visita eliminada correctamente."));
+        result.OnFailure(() => toastService.ShowError("No se pudo eliminar la visita."));
+
+        if (result.IsSuccess)
+        {
+            VisitaSeleccionada = null;
+            await Buscar();
+        }
     }
 }
