@@ -75,6 +75,32 @@
                     </InputSelect>
                 </div>
             </div>
+
+            @* Tabla *@
+            <div class="grid table-responsive">
+                <QuickGrid Items="ListaHistoriales.AsQueryable()" Class="table table-hover mt-3">
+                    <PropertyColumn Property="@(h => h.HistorialId)" Title="HistorialId" Sortable="true" />
+                    <PropertyColumn Property="@(h => h.SolicitudId)" Title="SolicitudId" Sortable="true" />
+                    <PropertyColumn Property="@(h => h.Solicitud.Cliente.Nombre)" Title="Cliente" Sortable="true" />
+                    <PropertyColumn Property="@(h => h.Solicitud.TipoServicio)" Title="Tipo de Servicio" Sortable="true" />
+                    <PropertyColumn Property="@(h => h.FechaFinalizacion)" Title="Fecha Finalización" Format="dd/MM/yyyy" Sortable="true" />
+                    <TemplateColumn Title="Técnico">
+                        @ObtenerNombreTecnico(context.TecnicoId)
+                    </TemplateColumn>
+                    <TemplateColumn Title="Estado">
+                        <span class="badge @ObtenerColorEstado(context.Solicitud.EstadoSolicitudId)">@context.Solicitud.EstadoSolicitud.Nombre</span>
+                    </TemplateColumn>
+                    <TemplateColumn Title="Acción" Align="Align.Center">
+                        <div class="d-flex text-nowrap justify-content-center">
+                            <a href="/Historial/Detalle/@context.HistorialId" class="btn btn-outline-primary bi bi-eye"></a>
+                        </div>
+                    </TemplateColumn>
+                </QuickGrid>
+            </div>
+        </div>
+
+        <div class="card-footer d-flex justify-content-between align-center mb-4">
+            <label>Cantidad:  @ListaHistoriales.Count</label>
         </div>
     </div>
 </div>
