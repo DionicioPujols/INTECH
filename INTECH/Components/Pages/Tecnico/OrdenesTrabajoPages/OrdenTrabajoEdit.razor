@@ -15,6 +15,43 @@
             <div class="card-header text-center">
                 <h5 class="card-title">Modificar Orden de Trabajo</h5>
             </div>
+
+            <div class="card-body">
+
+                @* Solicitud *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Solicitud</strong></label>
+                    <InputSelect class="form-control form-select" @bind-Value="OrdenTrabajo.SolicitudId">
+                        <option value="0" disabled>Elija una Solicitud</option>
+                        @foreach (var solicitud in ListaSolicitudes)
+                        {
+                            <option value="@solicitud.SolicitudId">Solicitud #@solicitud.SolicitudId - @solicitud.Cliente.Nombre (@solicitud.TipoServicio)</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="(() => OrdenTrabajo.SolicitudId)" />
+                </div>
+
+                @* Tareas a realizar *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Tareas a realizar (Checklist técnico)</strong></label>
+                    <InputTextArea class="form-control" @bind-Value="OrdenTrabajo.Tareas" placeholder="Ej.: 1. Inspección y preparación, 2. Instalación de materiales, 3. Pruebas eléctricas"></InputTextArea>
+                    <ValidationMessage For="(() => OrdenTrabajo.Tareas)" />
+                </div>
+
+                @* Materiales de la cotización *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Materiales de la cotización</strong></label>
+                    <InputTextArea class="form-control" @bind-Value="OrdenTrabajo.Materiales" placeholder="Ej.: UPS 6 kVA x 3, Batería 12V 120Ah x 2"></InputTextArea>
+                    <ValidationMessage For="(() => OrdenTrabajo.Materiales)" />
+                </div>
+
+                @* Instrucciones de campo *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Instrucciones de campo</strong></label>
+                    <InputTextArea class="form-control" @bind-Value="OrdenTrabajo.InstruccionesCampo" placeholder="Ej.: Coordinar el acceso con el cliente y documentar las pruebas de funcionamiento."></InputTextArea>
+                </div>
+
+            </div>
         </div>
     </div>
 </EditForm>
