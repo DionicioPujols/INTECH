@@ -14,4 +14,23 @@
         </div>
         <a href="/Agenda/Create" class="btn btn-primary"> <span class="bi bi-plus-square"></span> Nueva visita</a>
     </div>
+
+    <div class="row g-3">
+        <div class="col-12 col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    @* Filtros *@
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                        <div>
+                            <InputSelect class="form-select" @bind-Value="VistaActual">
+                                <option value="@VistaAgenda.Hoy">Hoy</option>
+                                <option value="@VistaAgenda.Semanal">Semanal</option>
+                                <option value="@VistaAgenda.Mensual">Mensual</option>
+                            </InputSelect>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
