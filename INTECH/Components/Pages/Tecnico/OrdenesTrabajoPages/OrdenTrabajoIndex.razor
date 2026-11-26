@@ -1,17 +1,322 @@
 @page "/OrdenTrabajo/Index"
 @attribute [Authorize(Roles = "Técnico")]
 
-<PageTitle>Órdenes de trabajo | INTECH</PageTitle>
+@inject OrdenesTrabajoService ordenesTrabajoService
+@inject SolicitudesService solicitudesService
+@inject EstadosSolicitudesService estadosSolicitudesService
+@inject ToastService toastService
 
-<div class="container-fluid p-0">
-    <div class="card">
-        <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-3">
-            <h1 class="h4 fw-normal mb-0">Órdenes de trabajo</h1>
-            
+<PageTitle>Registro de Órdenes de Trabajo</PageTitle>
+<div class="container">
+    <div class="card shadow-lg">
+        <div class="card-header d-flex justify-content-between align-center mb-4">
+            <h5 class="card-title">Registro de Órdenes de Trabajo</h5>
         </div>
-        <div class="card-body py-5">
-            <p class="text-body-secondary mb-0">No hay órdenes de trabajo registradas.</p>
+
+        <div class="card-body">
+            @* Filtro *@
+            <div class="row">
+                <div class="col-3">
+                    <label class="col-form-label"><strong>Filtrar por</strong></label>
+                </div>
+                <div class="col-4">
+                    <label class="col-form-label"><strong>Búsqueda</strong></label>
+                </div>
+            </div>
+
+            @* Controles de búsqueda *@
+            <div class="row align-items-center">
+                <div class="col-3">
+                    <InputSelect class="form-select" @bind-Value="Filtro">
+                        <option value="" selected disabled>Elija una opci&oacute;n</option>
+                        <option value="OrdenTrabajoId">OrdenTrabajoId</option>
+                        <option value="SolicitudId">SolicitudId</option>
+                        <option value="Cliente">Cliente</option>
+                        <option value="TipoServicio">Tipo de Servicio</option>
+                        <option value="Fecha">Fecha</option>
+                        <option value="Estado">Estado</option>
+                    </InputSelect>
+                </div>
+                <div class="col-4">
+                    <div class="input-group">
+                        <input class="form-control" @bind="ValorFiltro" placeholder="Buscar" />
+                        <button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"></button>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-3">
+                    <label class="col-form-label"><strong>Desde</strong></label>
+                    <InputDate class="form-control" @bind-Value="Desde"></InputDate>
+                </div>
+                <div class="col-3">
+                    <label class="col-form-label"><strong>Hasta</strong></label>
+                    <InputDate class="form-control" @bind-Value="Hasta"></InputDate>
+                </div>
+                <div class="col-3">
+                    <label class="col-form-label"><strong>Tipo de servicio</strong></label>
+                    <InputSelect class="form-select" @bind-Value="TipoServicioFiltro">
+                        <option value="">Todos</option>
+                        <option value="Cableado Estructurado">Cableado Estructurado</option>
+                        <option value="Instalación de Paneles Solares">Instalación de Paneles Solares</option>
+                        <option value="Instalación de Planta Eléctrica">Instalación de Planta Eléctrica</option>
+                        <option value="Instalación de Sistema UPS">Instalación de Sistema UPS</option>
+                        <option value="Mantenimiento Eléctrico">Mantenimiento Eléctrico</option>
+                    </InputSelect>
+                </div>
+                <div class="col-3">
+                    <label class="col-form-label"><strong>Estado</strong></label>
+                    <InputSelect class="form-select" @bind-Value="EstadoFiltroId">
+                        <option value="0">Todos</option>
+                        @foreach (var estadoSolicitud in ListaEstadosSolicitudes)
+                        {
+                            <option value="@estadoSolicitud.EstadoSolicitudId">@estadoSolicitud.Nombre</option>
+                        }
+                    </InputSelect>
+                </div>
+            </div>
+
+            @* Tabla *@
+            <div class="grid table-responsive">
+                <QuickGrid Items="ListaOrdenesTrabajo.AsQueryable()" Class="table table-hover mt-3">
+                    <PropertyColumn Property="@(o => o.OrdenTrabajoId)" Title="OrdenTrabajoId" Sortable="true" />
+                    <PropertyColumn Property="@(o => o.SolicitudId)" Title="SolicitudId" Sortable="true" />
+                    <PropertyColumn Property="@(o => o.Solicitud.Cliente.Nombre)" Title="Cliente" Sortable="true" />
+                    <PropertyColumn Property="@(o => o.Solicitud.TipoServicio)" Title="Tipo de Servicio" Sortable="true" />
+                    <PropertyColumn Property="@(o => o.Tareas)" Title="Tareas" Sortable="true" />
+                    <PropertyColumn Property="@(o => o.Materiales)" Title="Materiales" Sortable="true" />
+                    <PropertyColumn Property="@(o => o.InstruccionesCampo)" Title="Instrucciones" Sortable="true" />
+                    <TemplateColumn Title="Estado">
+                        <span class="badge @ObtenerColorEstado(context.Solicitud.EstadoSolicitudId)">@context.Solicitud.EstadoSolicitud.Nombre</span>
+                    </TemplateColumn>
+                    <TemplateColumn Title="Opciones" Align="Align.Center">
+                        <div class="d-flex text-nowrap">
+                            <a href="/OrdenTrabajo/Edit/@context.OrdenTrabajoId" class="btn btn-outline-primary bi bi-pencil-square"></a>
+                            <button type="button" class="btn btn-outline-danger bi bi-trash ms-2"
+                                    data-bs-toggle="modal" data-bs-target="#modalEliminarOrdenTrabajo"
+                                    @onclick="() => ordenTrabajoIdAEliminar = context.OrdenTrabajoId"></button>
+                            @if (context.Solicitud.EstadoSolicitudId == 2)
+                            {
+                                <button type="button" class="btn btn-outline-primary bi bi-check-lg ms-2"
+                                        @onclick="() => MarcarListaParaCobro(context)"> Marcar lista para cobro</button>
+                            }
+                        </div>
+                    </TemplateColumn>
+                </QuickGrid>
+            </div>
         </div>
-        <div class="card-footer">Cantidad: 0</div>
+
+        <div class="card-footer d-flex justify-content-between align-center mb-4">
+            <label>Cantidad:  @ListaOrdenesTrabajo.Count</label>
+        </div>
     </div>
 </div>
+
+@* Modal de eliminación *@
+<div class="modal fade" id="modalEliminarOrdenTrabajo" tabindex="-1" aria-labelledby="modalEliminarOrdenTrabajoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="modalEliminarOrdenTrabajoLabel">Eliminar Orden de Trabajo</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        ¿Estás seguro de que deseas eliminar esta orden de trabajo?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal" @onclick="Eliminar">Sí, eliminar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+@code {
+    public List<OrdenesTrabajo> ListaOrdenesTrabajo { get; set; } = new List<OrdenesTrabajo>();
+    public List<EstadosSolicitudes> ListaEstadosSolicitudes { get; set; } = new List<EstadosSolicitudes>();
+    public string Filtro { get; set; } = string.Empty;
+    public string ValorFiltro { get; set; } = string.Empty;
+    public DateTime? Desde { get; set; }
+    public DateTime? Hasta { get; set; }
+    public string TipoServicioFiltro { get; set; } = string.Empty;
+    public int EstadoFiltroId { get; set; }
+    private int ordenTrabajoIdAEliminar;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var estadosSolicitudesResult = await estadosSolicitudesService.GetList(e =>
+            e.EstadoSolicitudId == 2 || e.EstadoSolicitudId == 8 || e.EstadoSolicitudId == 9);
+        estadosSolicitudesResult.OnSuccess(estadosSolicitudes => ListaEstadosSolicitudes = estadosSolicitudes);
+        estadosSolicitudesResult.OnFailure(() => toastService.ShowError("No se pudieron consultar los estados."));
+
+        await CargarOrdenesTrabajo();
+        Desde = null;
+        Hasta = null;
+    }
+
+    private async Task CargarOrdenesTrabajo()
+    {
+        var ordenesResult = await ordenesTrabajoService.GetList(o => true);
+        ordenesResult.OnSuccess(ordenes => ListaOrdenesTrabajo = ordenes);
+        ordenesResult.OnFailure(() => toastService.ShowError("No se pudieron consultar las órdenes de trabajo."));
+    }
+
+    private string ObtenerColorEstado(int estadoSolicitudId)
+    {
+        if (estadoSolicitudId == 1)
+        {
+            return "bg-warning-subtle text-warning-emphasis";
+        }
+        else if (estadoSolicitudId == 2)
+        {
+            return "bg-primary-subtle text-primary-emphasis";
+        }
+        else if (estadoSolicitudId == 3)
+        {
+            return "bg-primary bg-opacity-10 text-primary";
+        }
+        else if (estadoSolicitudId == 5)
+        {
+            return "bg-warning-subtle text-danger-emphasis";
+        }
+        else if (estadoSolicitudId == 9)
+        {
+            return "bg-success-subtle text-success-emphasis";
+        }
+
+        return "bg-danger-subtle text-danger-emphasis";
+    }
+
+    private async Task MarcarListaParaCobro(OrdenesTrabajo ordenTrabajo)
+    {
+        Solicitudes? solicitud = null;
+        var solicitudResult = await solicitudesService.Buscar(ordenTrabajo.SolicitudId);
+        solicitudResult.OnSuccess(s => solicitud = s);
+        if (solicitudResult.IsFailure || solicitud == null)
+        {
+            toastService.ShowError("No se pudo consultar la solicitud de la orden.");
+            return;
+        }
+
+        solicitud.EstadoSolicitudId = 8;
+        var guardadoResult = await solicitudesService.Guardar(solicitud);
+        guardadoResult.OnSuccess(() => toastService.ShowSuccess("Orden marcada lista para cobro correctamente."));
+        guardadoResult.OnFailure(() => toastService.ShowError("No se pudo actualizar el estado de la orden."));
+        if (guardadoResult.IsSuccess)
+        {
+            await CargarOrdenesTrabajo();
+        }
+    }
+
+    private async Task Eliminar()
+    {
+        var result = await ordenesTrabajoService.Eliminar(ordenTrabajoIdAEliminar);
+        result.OnSuccess(() => toastService.ShowSuccess("Orden de trabajo eliminada correctamente."));
+        result.OnFailure(() => toastService.ShowError("No se pudo eliminar la orden de trabajo."));
+
+        if (result.IsSuccess)
+        {
+            await CargarOrdenesTrabajo();
+        }
+    }
+
+    private async Task Buscar()
+    {
+        var valor = ValorFiltro.Trim().ToLower();
+        if (Filtro == "Fecha")
+        {
+            if (Desde == null || Hasta == null)
+            {
+                toastService.ShowError("Seleccione las fechas desde y hasta.");
+                return;
+            }
+
+            if (Desde > Hasta)
+            {
+                toastService.ShowWarning("La fecha desde no puede ser mayor que la fecha hasta.");
+                return;
+            }
+
+            var ordenesPorFechaResult = await ordenesTrabajoService.GetList(o =>
+                o.Solicitud.FechaSolicitud >= Desde && o.Solicitud.FechaSolicitud <= Hasta);
+            ordenesPorFechaResult.OnSuccess(ordenes => ListaOrdenesTrabajo = ordenes);
+            ordenesPorFechaResult.OnFailure(() =>
+                toastService.ShowError("No se pudieron consultar las órdenes de trabajo."));
+        }
+        else if (Filtro == "Estado")
+        {
+            if (EstadoFiltroId == 0)
+            {
+                await CargarOrdenesTrabajo();
+                return;
+            }
+
+            var ordenesPorEstadoResult = await ordenesTrabajoService.GetList(o => o.Solicitud.EstadoSolicitudId == EstadoFiltroId);
+            ordenesPorEstadoResult.OnSuccess(ordenes => ListaOrdenesTrabajo = ordenes);
+            ordenesPorEstadoResult.OnFailure(() =>
+                toastService.ShowError("No se pudieron consultar las órdenes de trabajo."));
+        }
+        else if (Filtro == "TipoServicio")
+        {
+            if (TipoServicioFiltro != "")
+            {
+                var ordenesPorTipoResult = await ordenesTrabajoService.GetList(o => o.Solicitud.TipoServicio == TipoServicioFiltro);
+                ordenesPorTipoResult.OnSuccess(ordenes => ListaOrdenesTrabajo = ordenes);
+                ordenesPorTipoResult.OnFailure(() =>
+                    toastService.ShowError("No se pudieron consultar las órdenes de trabajo."));
+            }
+            else if (valor != "")
+            {
+                var ordenesPorTipoResult = await ordenesTrabajoService.GetList(o => o.Solicitud.TipoServicio.ToLower().Contains(valor));
+                ordenesPorTipoResult.OnSuccess(ordenes => ListaOrdenesTrabajo = ordenes);
+                ordenesPorTipoResult.OnFailure(() =>
+                    toastService.ShowError("No se pudieron consultar las órdenes de trabajo."));
+            }
+            else
+            {
+                await CargarOrdenesTrabajo();
+            }
+        }
+        else if (valor == "")
+        {
+            await CargarOrdenesTrabajo();
+        }
+        else if (Filtro == "OrdenTrabajoId")
+        {
+            if (!int.TryParse(valor, out var ordenTrabajoId))
+            {
+                toastService.ShowError("Ingrese un número de orden válido.");
+                return;
+            }
+
+            var ordenesPorIdResult = await ordenesTrabajoService.GetList(o => o.OrdenTrabajoId == ordenTrabajoId);
+            ordenesPorIdResult.OnSuccess(ordenes => ListaOrdenesTrabajo = ordenes);
+            ordenesPorIdResult.OnFailure(() =>
+                toastService.ShowError("No se pudieron consultar las órdenes de trabajo."));
+        }
+        else if (Filtro == "SolicitudId")
+        {
+            if (!int.TryParse(valor, out var solicitudId))
+            {
+                toastService.ShowError("Ingrese un número de solicitud válido.");
+                return;
+            }
+
+            var ordenesPorSolicitudResult = await ordenesTrabajoService.GetList(o => o.SolicitudId == solicitudId);
+            ordenesPorSolicitudResult.OnSuccess(ordenes => ListaOrdenesTrabajo = ordenes);
+            ordenesPorSolicitudResult.OnFailure(() =>
+                toastService.ShowError("No se pudieron consultar las órdenes de trabajo."));
+        }
+        else if (Filtro == "Cliente")
+        {
+            var ordenesPorClienteResult = await ordenesTrabajoService.GetList(o => o.Solicitud.Cliente.Nombre.ToLower().Contains(valor));
+            ordenesPorClienteResult.OnSuccess(ordenes => ListaOrdenesTrabajo = ordenes);
+            ordenesPorClienteResult.OnFailure(() =>
+                toastService.ShowError("No se pudieron consultar las órdenes de trabajo."));
+        }
+        else
+        {
+            toastService.ShowError("Seleccione un filtro.");
+        }
+    }
+}

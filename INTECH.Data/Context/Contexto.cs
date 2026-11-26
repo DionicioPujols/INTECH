@@ -16,6 +16,7 @@ public class Contexto : DbContext
     public DbSet<Levantamientos> Levantamientos { get; set; }
     public DbSet<FotosLevantamientos> FotosLevantamientos { get; set; }
     public DbSet<Agendas> Agendas { get; set; }
+    public DbSet<OrdenesTrabajo> OrdenesTrabajo { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
