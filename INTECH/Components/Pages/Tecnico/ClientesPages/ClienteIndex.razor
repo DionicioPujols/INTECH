@@ -2,6 +2,7 @@
 @attribute [Authorize(Roles = "Técnico")]
 
 @inject ClientesService clientesService
+@inject SolicitudesService solicitudesService
 @inject ToastService toastService
 
 <PageTitle>Registro de Clientes</PageTitle>
@@ -152,6 +153,16 @@
 
     private async Task Eliminar()
     {
+        var solicitudesActivasResult = await solicitudesService.GetList(s => s.ClienteId == clienteIdAEliminar && (s.EstadoSolicitudId == 2 || s.EstadoSolicitudId == 3));
+        var tieneSolicitudesActivas = false;
+        solicitudesActivasResult.OnSuccess(lista => tieneSolicitudesActivas = lista.Any());
+
+        if (tieneSolicitudesActivas)
+        {
+            toastService.ShowError("No se puede eliminar el cliente porque tiene solicitudes en proceso o en espera de administración.");
+            return;
+        }
+
         var result = await clientesService.Eliminar(clienteIdAEliminar);
         result.OnSuccess(() => toastService.ShowSuccess("Cliente eliminado correctamente."));
         result.OnFailure(() => toastService.ShowError("No se pudo eliminar correctamente"));
