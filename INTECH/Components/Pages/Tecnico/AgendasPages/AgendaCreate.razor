@@ -8,3 +8,14 @@
 @inject ToastService toastService
 
 <PageTitle>Nueva Visita</PageTitle>
+<EditForm Model="Agenda" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+
+    <div class="container">
+        <div class="card shadow-lg">
+            <div class="card-header text-center">
+                <h5 class="card-title">Nueva Visita</h5>
+            </div>
+        </div>
+    </div>
+</EditForm>
