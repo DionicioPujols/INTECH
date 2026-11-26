@@ -100,4 +100,19 @@
         solicitudesResult.OnSuccess(solicitudes => ListaSolicitudes = solicitudes);
         solicitudesResult.OnFailure(() => toastService.ShowError("No se pudieron consultar las solicitudes."));
     }
+
+    public async Task Modificar()
+    {
+        OrdenTrabajo.Tareas = OrdenTrabajo.Tareas.Trim();
+        OrdenTrabajo.Materiales = OrdenTrabajo.Materiales.Trim();
+        OrdenTrabajo.InstruccionesCampo = OrdenTrabajo.InstruccionesCampo.Trim();
+
+        var result = await ordenesTrabajoService.Guardar(OrdenTrabajo);
+        result.OnSuccess(() =>
+        {
+            toastService.ShowSuccess("Orden de trabajo modificada correctamente.");
+            navigationManager.NavigateTo("/OrdenTrabajo/Index");
+        });
+        result.OnFailure(() => toastService.ShowError("No se pudo modificar la orden de trabajo."));
+    }
 }
