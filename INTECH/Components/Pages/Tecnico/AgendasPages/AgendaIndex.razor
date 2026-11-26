@@ -55,6 +55,24 @@
                         </button>
                         <button type="button" class="btn btn-outline-primary btn-sm ms-auto" @onclick="IrAHoy">Hoy</button>
                     </div>
+                    @* Calendario *@
+                    @if (VistaActual == VistaAgenda.Hoy)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0 align-middle">
+                                <tbody>
+                                    @for (int hora = 8; hora <= 18; hora++)
+                                    {
+                                        var horaActual = hora;
+                                        <tr>
+                                            <td class="text-body-secondary small fc-col-hora">@($"{(horaActual > 12 ? horaActual - 12 : horaActual):00} {(horaActual >= 12 ? "PM" : "AM")}")</td>
+                                            <td class="fc-slot-cell"></td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
                 </div>
             </div>
         </div>
