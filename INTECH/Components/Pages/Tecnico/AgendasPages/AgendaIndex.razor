@@ -382,4 +382,34 @@
 
         return "bg-danger-subtle text-danger-emphasis";
     }
+
+    private async Task Buscar()
+    {
+        var valor = SolicitudIdFiltro.Trim();
+        int? solicitudId = null;
+        if (valor != "")
+        {
+            if (!int.TryParse(valor, out var id))
+            {
+                toastService.ShowError("Ingrese un número de solicitud válido.");
+                return;
+            }
+            solicitudId = id;
+        }
+
+        var agendasResult = await agendasService.GetList(a =>
+            (solicitudId == null || a.SolicitudId == solicitudId) &&
+            (TecnicoFiltroId == "" ||
+                (TecnicoFiltroId == "SIN_ASIGNAR" ? string.IsNullOrEmpty(a.TecnicoId) : a.TecnicoId == TecnicoFiltroId)));
+
+        agendasResult.OnSuccess(agendas =>
+        {
+            ListaAgendas = agendas;
+            if (VisitaSeleccionada != null)
+            {
+                VisitaSeleccionada = ListaAgendas.FirstOrDefault(a => a.AgendaId == VisitaSeleccionada.AgendaId);
+            }
+        });
+        agendasResult.OnFailure(() => toastService.ShowError("No se pudieron consultar las visitas."));
+    }
 }
