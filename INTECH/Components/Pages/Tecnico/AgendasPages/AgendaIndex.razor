@@ -341,4 +341,45 @@
         var lunes = FechaReferencia.AddDays(-desplazamiento);
         return Enumerable.Range(0, 7).Select(i => lunes.AddDays(i)).ToList();
     }
+
+    private void SeleccionarVisita(Agendas visita)
+    {
+        VisitaSeleccionada = visita;
+    }
+
+    private string ObtenerNombreTecnico(string? tecnicoId)
+    {
+        if (string.IsNullOrWhiteSpace(tecnicoId))
+        {
+            return "Sin asignar";
+        }
+
+        return ListaTecnicos.FirstOrDefault(t => t.Id == tecnicoId)?.UserName ?? "Sin asignar";
+    }
+
+    private string ObtenerColorEstado(int estadoSolicitudId)
+    {
+        if (estadoSolicitudId == 1)
+        {
+            return "bg-warning-subtle text-warning-emphasis";
+        }
+        else if (estadoSolicitudId == 2)
+        {
+            return "bg-primary-subtle text-primary-emphasis";
+        }
+        else if (estadoSolicitudId == 3)
+        {
+            return "bg-primary bg-opacity-10 text-primary";
+        }
+        else if (estadoSolicitudId == 5)
+        {
+            return "bg-warning-subtle text-danger-emphasis";
+        }
+        else if (estadoSolicitudId == 9)
+        {
+            return "bg-success-subtle text-success-emphasis";
+        }
+
+        return "bg-danger-subtle text-danger-emphasis";
+    }
 }
