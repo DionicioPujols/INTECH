@@ -24,4 +24,36 @@ public class OrdenesTrabajoService(
             return Result.Success(modifico);
         }
     }
+
+    private async Task<bool> Existe(int ordenTrabajoId)
+    {
+        await using var contexto = await contextFactory.CreateDbContextAsync();
+        return await contexto.OrdenesTrabajo
+            .AnyAsync(o => o.OrdenTrabajoId == ordenTrabajoId);
+    }
+
+    private async Task<bool> Insertar(OrdenesTrabajo ordenTrabajo)
+    {
+        await using var contexto = await contextFactory.CreateDbContextAsync();
+        contexto.OrdenesTrabajo.Add(ordenTrabajo);
+        return await contexto.SaveChangesAsync() > 0;
+    }
+
+    private async Task<bool> Modificar(OrdenesTrabajo ordenTrabajo)
+    {
+        await using var contexto = await contextFactory.CreateDbContextAsync();
+        var ordenExistente = await contexto.OrdenesTrabajo
+            .SingleOrDefaultAsync(o => o.OrdenTrabajoId == ordenTrabajo.OrdenTrabajoId);
+        if (ordenExistente == null)
+        {
+            return false;
+        }
+
+        ordenExistente.SolicitudId = ordenTrabajo.SolicitudId;
+        ordenExistente.Tareas = ordenTrabajo.Tareas;
+        ordenExistente.Materiales = ordenTrabajo.Materiales;
+        ordenExistente.InstruccionesCampo = ordenTrabajo.InstruccionesCampo;
+
+        return await contexto.SaveChangesAsync() > 0;
+    }
 }
